@@ -33,7 +33,7 @@ extension MemoryAddressable {
 
     /// writes a 16 bit value with low order byte at `lowByteAddress` and then a high order
     /// byte at `lowByteAddress + 1`
-    public func writeWord(toAddressStartingAt lowByteAddress: UInt16, word: UInt16) throws {
+    public func write(toAddressStartingAt lowByteAddress: UInt16, word: UInt16) throws {
         let highByteAddress = lowByteAddress + 1
 
         let lowByte = UInt8(truncatingIfNeeded: word)

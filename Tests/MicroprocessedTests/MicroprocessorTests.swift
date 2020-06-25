@@ -4,7 +4,7 @@ import XCTest
 final class MicroprocessorTests: SystemTests {
 
     func testFetch() throws {
-        try ram.writeWord(toAddressStartingAt: Microprocessor.resetVectorLow, word: 0x8000)
+        try ram.write(toAddressStartingAt: Microprocessor.resetVector, word: 0x8000)
 
         try mpu.reset()
         XCTAssert(mpu.registers.PC == 0x8000)
@@ -12,5 +12,6 @@ final class MicroprocessorTests: SystemTests {
         let instruction = try mpu.fetch()
         XCTAssert(mpu.registers.PC == 0x8001)
         XCTAssert(instruction.mnemonic ~= .nop)
+        XCTAssert(instruction.size == 1)
     }
 }

@@ -19,54 +19,48 @@ public class Microprocessor {
     /// configures the microprocessor
     public let configuration: Configuration
 
-    /// metadata flag
-    public private(set) var isRunning = false
+    /// raw register state
+    public internal(set) var registers: Registers = .init()
 
-    var registers: Registers = .init()
-
+    /// create a `Microprocessor` with a given memory layout and configuration.
+    ///
+    /// NOTE: `memoryLayout` is `unowned`, so it is the creator's responsibility to keep
+    /// both the created `Microprocessor` and `memoryLayout` strongly referenced
     public required init(memoryLayout memory: MemoryAddressable, configuration: Configuration = .default) {
         self.memory = memory
         self.configuration = configuration
     }
 
+    /// reset the `Microprocessor` register state and load `PC` at the `resetVector` address
     public func reset() throws {
-        registers.PC = try memory.readWord(fromAddressStartingAt: Microprocessor.resetVectorLow)
+        registers.PC = try memory.readWord(fromAddressStartingAt: Microprocessor.resetVector)
         registers.A = 0
         registers.X = 0
         registers.Y = 0
         registers.SP = 0xFF
     }
 
-    public func step() throws {
+    /// send a single clock rising edge pulse to the `Microprocessor`
+    public func tick() throws {
         let instruction = try fetch()
 
         try execute(instruction)
 
         // TODO: notify observer(s)
     }
-
-    public func run() throws {
-        isRunning = true
-
-        while isRunning {
-            try step()
-        }
-    }
-
-    public func pause() {
-        isRunning = false
-    }
 }
 
 extension Microprocessor {
 
+    /// fetch an instruction and increment the PC
     func fetch() throws -> Instruction {
-        let opcode = try memory.read(from: registers.PC)
-        registers.PC += 1
+        let instruction = try Instruction(memory: memory, registers: registers)
+        registers.PC += instruction.size
 
-        return try Instruction(opcode)
+        return instruction
     }
 
+    /// execute the instruction and update status register
     func execute(_ instruction: Instruction) throws {
 
     }
@@ -75,20 +69,21 @@ extension Microprocessor {
 extension Microprocessor {
 
     /// non-maskable interrupt vector. when NMI is encountered, the MPU will request the address of the ISR at this address
-    public static let nmiVectorLow: UInt16 = 0xFFFA
-    public static let nmiVectorHigh: UInt16 = nmiVectorLow + 1
+    public static let nmiVector: UInt16 = 0xFFFA
+    public static let nmiVectorHigh: UInt16 = nmiVector + 1
 
     /// reset interrupt vector. when a reset occurs, the MPU will request the address for code start at this address
-    public static let resetVectorLow: UInt16 = 0xFFFC
-    public static let resetVectorHigh: UInt16 = resetVectorLow + 1
+    public static let resetVector: UInt16 = 0xFFFC
+    public static let resetVectorHigh: UInt16 = resetVector + 1
 
     /// interrupt vector. when an interrupt occurs, the MPU will request the address of the ISR at this address
-    public static let irqVectorLow: UInt16 = 0xFFFE
-    public static let irqVectorHight: UInt16 = irqVectorLow + 1
+    public static let irqVector: UInt16 = 0xFFFE
+    public static let irqVectorHight: UInt16 = irqVector + 1
 }
 
 extension Microprocessor {
 
+    /// Register state of the `Microprocessor`
     public struct Registers {
 
         /// accumulator
