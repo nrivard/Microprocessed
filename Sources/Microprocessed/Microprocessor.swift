@@ -13,11 +13,12 @@ import Foundation
 /// Queries supplied `MemoryAddressable` object for instructions and data.
 public class Microprocessor {
 
+    public enum Error: Swift.Error {
+        case undefinedInstruction
+    }
+
     /// Memory layout that the MPU uses to fetch opcodes and data alike
     public unowned let memory: MemoryAddressable
-
-    /// configures the microprocessor
-    public let configuration: Configuration
 
     /// raw register state
     public internal(set) var registers: Registers = .init()
@@ -26,9 +27,8 @@ public class Microprocessor {
     ///
     /// NOTE: `memoryLayout` is `unowned`, so it is the creator's responsibility to keep
     /// both the created `Microprocessor` and `memoryLayout` strongly referenced
-    public required init(memoryLayout memory: MemoryAddressable, configuration: Configuration = .default) {
+    public required init(memoryLayout memory: MemoryAddressable) {
         self.memory = memory
-        self.configuration = configuration
     }
 
     /// reset the `Microprocessor` register state and load `PC` at the `resetVector` address
@@ -62,7 +62,19 @@ extension Microprocessor {
 
     /// execute the instruction and update status register
     func execute(_ instruction: Instruction) throws {
-
+        switch instruction.mnemonic {
+        case .lda:
+            registers.A = try instruction.addressingMode.value(from: memory, registers: registers)
+        case .ldx:
+            registers.X = try instruction.addressingMode.value(from: memory, registers: registers)
+        case .ldy:
+            registers.Y = try instruction.addressingMode.value(from: memory, registers: registers)
+        case .nop:
+            // already updated PC, so nothing to do
+            break
+        case .undefined:
+            throw Error.undefinedInstruction
+        }
     }
 }
 
@@ -79,29 +91,4 @@ extension Microprocessor {
     /// interrupt vector. when an interrupt occurs, the MPU will request the address of the ISR at this address
     public static let irqVector: UInt16 = 0xFFFE
     public static let irqVectorHight: UInt16 = irqVector + 1
-}
-
-extension Microprocessor {
-
-    /// Register state of the `Microprocessor`
-    public struct Registers {
-
-        /// accumulator
-        var A: UInt8 = 0
-
-        /// X index
-        var X: UInt8 = 0
-
-        /// Y index
-        var Y: UInt8 = 0
-
-        /// Stack pointer offset
-        var SP: UInt8 = 0
-
-        /// Status register
-        var SR: UInt8 = 0
-
-        /// Program counter
-        var PC: UInt16 = 0
-    }
 }

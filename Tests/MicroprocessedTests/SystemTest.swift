@@ -21,4 +21,9 @@ class SystemTests: XCTestCase {
         ram = nil
         mpu = nil
     }
+
+    func reset(toAddress address: UInt16) throws {
+        try ram.write(toAddressStartingAt: Microprocessor.resetVector, word: address)
+        try mpu.reset()
+    }
 }

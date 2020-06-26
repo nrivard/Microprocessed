@@ -12,6 +12,7 @@ extension Instruction {
     public enum AddressingMode {
         public enum Error: Swift.Error {
             case unknown
+            case noAssociatedValue
         }
 
         case implied
@@ -25,7 +26,7 @@ extension Instruction {
 //        case zeroPageIndexed(address: UInt8, offset: UInt8)
 //        case relative(offset: Int8)
 
-        public init(_ opcode: UInt8, memory: MemoryAddressable, registers: Microprocessor.Registers) throws {
+        public init(_ opcode: UInt8, memory: MemoryAddressable, registers: Registers) throws {
             typealias Opcodes = Instruction.AddressingMode.Opcodes
 
             switch opcode {
@@ -44,6 +45,22 @@ extension Instruction {
             default:
                 throw Instruction.AddressingMode.Error.unknown
             }
+        }
+    }
+}
+
+extension Instruction.AddressingMode {
+
+    public func value(from memory: MemoryAddressable, registers: Registers) throws -> UInt8 {
+        switch self {
+        case .immediate(let value):
+            return value
+
+        case .zeroPage(let addr):
+            return try memory.read(from: UInt16(addr))
+
+        case .implied, .accumulator, .stack:
+            throw Error.noAssociatedValue
         }
     }
 }

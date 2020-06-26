@@ -34,9 +34,13 @@ public struct Instruction {
     }
 
     /// creates an instruction from memory with given register state.
-    init(memory: MemoryAddressable, registers: Microprocessor.Registers) throws {
+    init(memory: MemoryAddressable, registers: Registers) throws {
         self.opcode = try memory.read(from: registers.PC)
         self.addressingMode = try AddressingMode(opcode, memory: memory, registers: registers)
     }
-}
 
+    init(opcode: UInt8, addressingMode: AddressingMode) {
+        self.opcode = opcode
+        self.addressingMode = addressingMode
+    }
+}
