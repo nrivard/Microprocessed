@@ -50,6 +50,12 @@ extension Instruction.Mnemonic {
         static let dey: [UInt8] = [0x88]
         static let dec: [UInt8] = [0xC6, 0xCE, 0xD6, 0xDE]
 
+        // MARK: - Shift
+        static let asl: [UInt8] = [0x06, 0x0A, 0x0E, 0x16, 0x1E]
+        static let lsr: [UInt8] = []
+        static let rol: [UInt8] = []
+        static let ror: [UInt8] = []
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }

@@ -180,6 +180,15 @@ extension Microprocessor {
 
             registers.updateZero(for: UInt16(result))
             registers.updateSign(for: UInt16(result))
+
+        case .asl:
+            let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers)) << 1
+
+            registers.updateZero(for: result)
+            registers.updateSign(for: result)
+            registers.updateCarry(for: result)
+
+            try save(result, addressingMode: instruction.addressingMode)
             
         case .nop:
             // already updated PC, so nothing to do
@@ -188,6 +197,24 @@ extension Microprocessor {
         case .undefined:
             throw Error.undefinedInstruction
         }
+    }
+}
+
+extension Microprocessor {
+
+    /// saves values either to the accumulator or referenced memory location
+    ///
+    /// NOTE: this is useful for arithmetic instructions
+    private func save(_ value: UInt16, addressingMode: Instruction.AddressingMode) throws {
+        let truncatedValue = UInt8(value & 0x00FF)
+
+        guard addressingMode != .accumulator else {
+            registers.A = truncatedValue
+            return
+        }
+
+        let addr = try addressingMode.address(from: memory, registers: registers)
+        try memory.write(to: addr, data: truncatedValue)
     }
 }
 

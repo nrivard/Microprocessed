@@ -92,11 +92,12 @@ final class AddressingModeTests: SystemTests {
 
     func testAccumulator() throws {
         for opcode in Opcodes.accumulator {
+            mpu.registers.A = 0x18
             try ram.write(to: mpu.registers.PC, data: opcode)
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .accumulator)
-            XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
+            XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == 0x18)
             XCTAssertThrowsError(try addressingMode.address(from: ram, registers: mpu.registers))
         }
     }

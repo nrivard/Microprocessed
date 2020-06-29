@@ -50,6 +50,12 @@ extension Instruction {
         case dey
         case dec
 
+        // MARK: - Shift
+        case asl
+//        case lsr
+//        case rol
+//        case ror
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -112,6 +118,9 @@ extension Instruction {
                 self = .dey
             case Opcodes.dec:
                 self = .dec
+
+            case Opcodes.asl:
+                self = .asl
 
             case Opcodes.noop:
                 self = .nop

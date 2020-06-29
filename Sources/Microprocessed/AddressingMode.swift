@@ -115,13 +115,16 @@ extension Instruction.AddressingMode {
     /// returns the semantic value, usually fetched from memory
     public func value(from memory: MemoryAddressable, registers: Registers) throws -> UInt8 {
         switch self {
+        case .accumulator:
+            return registers.A
+            
         case .immediate(let value):
             return value
 
         case .zeroPage, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed, .absolute, .absoluteIndexed:
             return try memory.read(from: try address(from: memory, registers: registers))
 
-        case .implied, .accumulator, .stack, .relative, .absoluteIndirect, .absoluteIndexedIndirect:
+        case .implied, .stack, .relative, .absoluteIndirect, .absoluteIndexedIndirect:
             throw Error.noAssociatedValue
         }
     }
