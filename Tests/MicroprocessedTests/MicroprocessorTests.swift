@@ -25,54 +25,6 @@ final class MicroprocessorTests: SystemTests {
         try mpu.testLoadImmediateStatusFlags(for: 0xA0)
     }
 
-    // MARK: - LDA
-
-    func testLDAImmediate() throws {
-        let opcode: UInt8 = 0xA9
-        try mpu.execute(opcode, data: opcode)
-        XCTAssert(mpu.registers.A == opcode)
-    }
-
-    func testLDAZeroPage() throws {
-        let opcode: UInt8 = 0xA5
-        try ram.write(to: 0x0080, data: opcode)
-
-        try mpu.execute(opcode, data: 0x80)
-        XCTAssert(mpu.registers.A == opcode)
-    }
-
-    // MARK: - LDX
-
-    func testLDXImmediate() throws {
-        let opcode: UInt8 = 0xA2
-        try mpu.execute(opcode, data: opcode)
-        XCTAssert(mpu.registers.X == opcode)
-    }
-
-    func testLDXZeroPage() throws {
-        let opcode: UInt8 = 0xA6
-        try ram.write(to: 0x0080, data: opcode)
-
-        try mpu.execute(opcode, data: 0x80)
-        XCTAssert(mpu.registers.X == opcode)
-    }
-
-    // MARK: - LDY
-
-    func testLDYImmediate() throws {
-        let opcode: UInt8 = 0xA0
-        try mpu.execute(opcode, data: opcode)
-        XCTAssert(mpu.registers.Y == opcode)
-    }
-
-    func testLDYZeroPage() throws {
-        let opcode: UInt8 = 0xA4
-        try ram.write(to: 0x0080, data: opcode)
-
-        try mpu.execute(opcode, data: 0x80)
-        XCTAssert(mpu.registers.Y == opcode)
-    }
-
     // MARK: - NOP
 
     func testNOP() throws {
@@ -92,6 +44,13 @@ extension Microprocessor {
     func execute(_ opcode: UInt8, data: UInt8) throws {
         try memory.write(to: registers.PC, data: opcode)
         try memory.write(to: registers.PC + 1, data: data)
+        try tick()
+    }
+
+    /// convenience that writes an opcode and word, then executes it
+    func execute(_ opcode: UInt8, word: UInt16) throws {
+        try memory.write(to: registers.PC, data: opcode)
+        try memory.write(toAddressStartingAt: registers.PC + 1, word: word)
         try tick()
     }
 

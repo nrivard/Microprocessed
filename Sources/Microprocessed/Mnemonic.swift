@@ -17,7 +17,9 @@ extension Instruction {
         case ldy
 
         // MARK: - Store
-        
+        case sta
+        case stx
+        case sty
 
         // MARK: - Miscellaneous
         case nop
@@ -31,8 +33,17 @@ extension Instruction {
                 self = .ldx
             case Opcodes.ldy:
                 self = .ldy
+
+            case Opcodes.sta:
+                self = .sta
+            case Opcodes.stx:
+                self = .stx
+            case Opcodes.sty:
+                self = .sty
+
             case Opcodes.noop:
                 self = .nop
+
             default:
                 self = .undefined
             }

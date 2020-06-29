@@ -74,6 +74,7 @@ final class AddressingModeTests: SystemTests {
         XCTAssert(try testOpcode(Opcodes.zeroPageIndexedY[0], expectedSize: 2))
         XCTAssert(try testOpcode(Opcodes.zeroPageIndirect[0], expectedSize: 2))
         XCTAssert(try testOpcode(Opcodes.zeroPageIndexedIndirect[0], expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndirectIndexed[0], expectedSize: 2))
         XCTAssert(try testOpcode(Opcodes.relative[0], expectedSize: 2))
 
     }
@@ -85,7 +86,7 @@ final class AddressingModeTests: SystemTests {
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .implied)
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+            XCTAssertThrowsError(try addressingMode.address(from: ram, registers: mpu.registers))
         }
     }
 
@@ -96,7 +97,7 @@ final class AddressingModeTests: SystemTests {
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .accumulator)
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+            XCTAssertThrowsError(try addressingMode.address(from: ram, registers: mpu.registers))
         }
     }
 
@@ -105,9 +106,9 @@ final class AddressingModeTests: SystemTests {
             try ram.write(to: mpu.registers.PC, data: opcode)
 
             let addressingMode = try mpu.fetch().addressingMode
-            XCTAssert(addressingMode ~= .stack, "Received \(addressingMode)")
+            XCTAssert(addressingMode ~= .stack)
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+            XCTAssertThrowsError(try addressingMode.address(from: ram, registers: mpu.registers))
         }
     }
 
@@ -123,7 +124,7 @@ final class AddressingModeTests: SystemTests {
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
 
             // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+            XCTAssertThrowsError(try addressingMode.address(from: ram, registers: mpu.registers))
         }
     }
 
@@ -136,10 +137,8 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .absolute(address: adjustedAddress))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == adjustedAddress)
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
-
-            // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
     }
 
@@ -159,10 +158,8 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .absoluteIndexed(address: absolutePageBase, offset: index))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == absolutePageBase + UInt16(index))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
-
-            // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
 
         for (index, opcode) in Opcodes.absoluteIndexedX.enumerated() {
@@ -186,7 +183,7 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .absoluteIndirect(address: indirectBase))
-            XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == UInt16(opcode &+ 1))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == UInt16(opcode &+ 1))
 
             // doesn't support value mode
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
@@ -209,7 +206,7 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .absoluteIndexedIndirect(address: indirectBase, offset: synthesizedIndex))
-            XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == UInt16(opcode &+ 1))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == UInt16(opcode &+ 1))
 
             // doesn't support value mode
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
@@ -230,7 +227,7 @@ final class AddressingModeTests: SystemTests {
             XCTAssert(addressingMode ~= .relative(offset: offset))
 
             let resolvedAddress = UInt16(bitPattern: Int16(offset)) &+ mpu.registers.PC
-            XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == resolvedAddress)
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == resolvedAddress)
 
             // doesn't support value mode
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
@@ -247,10 +244,8 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .zeroPage(address: UInt8(index)))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == UInt16(index))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
-
-            // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
     }
 
@@ -270,10 +265,8 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .zeroPageIndexed(address: zeroPageBase, offset: index))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == UInt16(zeroPageBase + index))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
-
-            // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
 
         for (index, opcode) in Opcodes.zeroPageIndexedX.enumerated() {
@@ -300,10 +293,8 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .zeroPageIndirect(address: UInt8(index * 2)))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == indirectBase + UInt16(index))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
-
-            // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
     }
 
@@ -321,10 +312,8 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .zeroPageIndexedIndirect(address: zeroPageBase, offset: UInt8(index)))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == resolvedBase + UInt16(index))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
-
-            // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
     }
 
@@ -342,10 +331,8 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .zeroPageIndirectIndexed(address: zeroPageBase, offset: UInt8(index)))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == resolvedBase + UInt16(index))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
-
-            // doesn't support word mode
-            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
     }
 }

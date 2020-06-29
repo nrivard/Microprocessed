@@ -42,11 +42,7 @@ public class Microprocessor {
 
     /// send a single clock rising edge pulse to the `Microprocessor`
     public func tick() throws {
-        let instruction = try fetch()
-
-        try execute(instruction)
-
-        // TODO: notify observer(s)
+        try execute(try fetch())
     }
 }
 
@@ -63,6 +59,7 @@ extension Microprocessor {
     /// execute the instruction and update status register
     func execute(_ instruction: Instruction) throws {
         switch instruction.mnemonic {
+
         case .lda, .ldx, .ldy:
             let result = try instruction.addressingMode.value(from: memory, registers: registers)
             registers.updateZero(for: UInt16(result))
@@ -75,6 +72,24 @@ extension Microprocessor {
             } else if case .ldy = instruction.mnemonic {
                 registers.Y = result
             }
+
+        case .sta, .stx, .sty:
+            let addr = try instruction.addressingMode.address(from: memory, registers: registers)
+
+            let registerValue: UInt8
+            if case .sta = instruction.mnemonic {
+                registerValue = registers.A
+            } else if case .stx = instruction.mnemonic {
+                registerValue = registers.X
+            } else if case .sty = instruction.mnemonic {
+                registerValue = registers.Y
+            } else {
+                // should never get here
+                throw Error.undefinedInstruction
+            }
+
+            try memory.write(to: addr, data: registerValue)
+            
         case .nop:
             // already updated PC, so nothing to do
             break

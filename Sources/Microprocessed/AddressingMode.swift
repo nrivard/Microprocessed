@@ -13,7 +13,7 @@ extension Instruction {
         public enum Error: Swift.Error {
             case unknown
             case noAssociatedValue
-            case incorrectValueType
+            case noResolvedAddress
         }
 
         case implied
@@ -112,47 +112,47 @@ extension Instruction {
 
 extension Instruction.AddressingMode {
 
+    /// returns the semantic value, usually fetched from memory
     public func value(from memory: MemoryAddressable, registers: Registers) throws -> UInt8 {
         switch self {
         case .immediate(let value):
             return value
 
-        case .zeroPage(let addr):
-            return try memory.read(from: UInt16(addr))
+        case .zeroPage, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed, .absolute, .absoluteIndexed:
+            return try memory.read(from: try address(from: memory, registers: registers))
 
-        case .zeroPageIndexed(let addr, let offset):
-            return try memory.read(from: UInt16(addr + offset))
-
-        case .zeroPageIndirect(let addr):
-            let resolvedAddr = try memory.readWord(fromAddressStartingAt:  UInt16(addr))
-            return try memory.read(from: UInt16(resolvedAddr))
-
-        case .zeroPageIndexedIndirect(let addr, let offset):
-            let resolvedAddr = try memory.readWord(fromAddressStartingAt: UInt16(addr + offset))
-            return try memory.read(from: resolvedAddr)
-
-        case .zeroPageIndirectIndexed(let addr, let offset):
-            let resolvedAddr = try memory.readWord(fromAddressStartingAt: UInt16(addr))
-            return try memory.read(from: resolvedAddr + UInt16(offset))
-
-        case .absolute(let addr):
-            return try memory.read(from: addr)
-
-        case .absoluteIndexed(let addr, let offset):
-            return try memory.read(from: addr + UInt16(offset))
-
-        case .implied, .accumulator, .stack:
+        case .implied, .accumulator, .stack, .relative, .absoluteIndirect, .absoluteIndexedIndirect:
             throw Error.noAssociatedValue
-
-        case .relative, .absoluteIndirect, .absoluteIndexedIndirect:
-            throw Error.incorrectValueType
         }
     }
 
-    public func word(from memory: MemoryAddressable, registers: Registers) throws -> UInt16 {
+    /// returns the result address
+    public func address(from memory: MemoryAddressable, registers: Registers) throws -> UInt16 {
         switch self {
+
+        case .zeroPage(let addr):
+            return UInt16(addr)
+
+        case .zeroPageIndexed(let addr, let offset):
+            return UInt16(addr + offset)
+
+        case .zeroPageIndirect(let addr):
+            return try memory.readWord(fromAddressStartingAt:  UInt16(addr))
+
+        case .zeroPageIndexedIndirect(let addr, let offset):
+            return try memory.readWord(fromAddressStartingAt: UInt16(addr + offset))
+
+        case .zeroPageIndirectIndexed(let addr, let offset):
+            return try memory.readWord(fromAddressStartingAt: UInt16(addr)) + UInt16(offset)
+
         case .relative(let offset):
             return UInt16(Int32(registers.PC) + Int32(offset))
+
+        case .absolute(let addr):
+            return addr
+
+        case .absoluteIndexed(let addr, let offset):
+            return addr + UInt16(offset)
 
         case .absoluteIndirect(let addr):
             return try memory.readWord(fromAddressStartingAt: addr)
@@ -161,11 +161,8 @@ extension Instruction.AddressingMode {
             let resolvedAddr = try memory.readWord(fromAddressStartingAt: addr + UInt16(offset))
             return try memory.readWord(fromAddressStartingAt: resolvedAddr)
 
-        case .immediate, .zeroPage, .absolute, .zeroPageIndexed, .absoluteIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed:
-            throw Error.incorrectValueType
-
-        case .implied, .accumulator, .stack:
-            throw Error.noAssociatedValue
+        case .immediate, .implied, .accumulator, .stack:
+            throw Error.noResolvedAddress
         }
     }
 }
