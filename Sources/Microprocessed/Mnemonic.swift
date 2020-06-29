@@ -20,6 +20,7 @@ extension Instruction {
         case sta
         case stx
         case sty
+        case stz
 
         // MARK: - Miscellaneous
         case nop
@@ -40,6 +41,8 @@ extension Instruction {
                 self = .stx
             case Opcodes.sty:
                 self = .sty
+            case Opcodes.stz:
+                self = .stz
 
             case Opcodes.noop:
                 self = .nop

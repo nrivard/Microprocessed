@@ -73,7 +73,7 @@ extension Microprocessor {
                 registers.Y = result
             }
 
-        case .sta, .stx, .sty:
+        case .sta, .stx, .sty, .stz:
             let addr = try instruction.addressingMode.address(from: memory, registers: registers)
 
             let registerValue: UInt8
@@ -83,6 +83,8 @@ extension Microprocessor {
                 registerValue = registers.X
             } else if case .sty = instruction.mnemonic {
                 registerValue = registers.Y
+            } else if case .stz = instruction.mnemonic {
+                registerValue = 0x00
             } else {
                 // should never get here
                 throw Error.undefinedInstruction

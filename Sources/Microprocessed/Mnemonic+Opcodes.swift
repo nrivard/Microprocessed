@@ -20,6 +20,7 @@ extension Instruction.Mnemonic {
         static let sta: [UInt8] = [0x81, 0x85, 0x8D, 0x91, 0x92, 0x95, 0x99, 0x9D]
         static let stx: [UInt8] = [0x86, 0x8E, 0x96]
         static let sty: [UInt8] = [0x84, 0x8C, 0x94]
+        static let stz: [UInt8] = [0x64, 0x74, 0x9C, 0x9E]
 
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]

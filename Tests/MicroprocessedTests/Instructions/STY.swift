@@ -20,7 +20,7 @@ final class STYTests: SystemTests {
         XCTAssert(try ram.read(from: 0x0095) == mpu.registers.Y)
     }
 
-    func testSTXAbsolute() throws {
+    func testSTYAbsolute() throws {
         let opcode: UInt8 = 0x8C
         mpu.registers.Y = opcode &+ 1
 
