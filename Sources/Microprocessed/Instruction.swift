@@ -23,7 +23,7 @@ public struct Instruction {
         switch addressingMode {
         case .implied, .stack, .accumulator:
             return 1
-        case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect:
+        case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed:
             return 2
         case .absolute, .absoluteIndexed, .absoluteIndirect, .absoluteIndexedIndirect:
             return 3

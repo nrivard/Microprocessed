@@ -327,4 +327,25 @@ final class AddressingModeTests: SystemTests {
             XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
         }
     }
+
+    func testZeroPageIndirectIndexed() throws {
+        let zeroPageBase: UInt8 = 0xDA
+        let resolvedBase: UInt16 = 0x1234
+
+        for (index, opcode) in Opcodes.zeroPageIndirectIndexed.enumerated() {
+            try ram.write(to: resolvedBase + UInt16(index), data: opcode &+ 1)
+            try ram.write(toAddressStartingAt: UInt16(zeroPageBase), word: resolvedBase)
+
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(to: mpu.registers.PC + 1, data: zeroPageBase)
+            mpu.registers.Y = UInt8(index)
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .zeroPageIndirectIndexed(address: zeroPageBase, offset: UInt8(index)))
+            XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
+
+            // doesn't support word mode
+            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+        }
+    }
 }
