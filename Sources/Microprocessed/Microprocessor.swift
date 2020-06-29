@@ -134,10 +134,57 @@ extension Microprocessor {
             registers.X = registers.SP
             registers.updateZero(for: UInt16(registers.X))
             registers.updateSign(for: UInt16(registers.X))
+
+        case .ina, .inx, .iny, .inc:
+            let result: UInt8
+
+            if case .ina = instruction.mnemonic {
+                registers.A += 1
+                result = registers.A
+            } else if case .inx = instruction.mnemonic {
+                registers.X += 1
+                result = registers.X
+            } else if case .iny = instruction.mnemonic {
+                registers.Y += 1
+                result = registers.Y
+            } else if case .inc = instruction.mnemonic {
+                let addr = try instruction.addressingMode.address(from: memory, registers: registers)
+                result = try instruction.addressingMode.value(from: memory, registers: registers) + 1
+                try memory.write(to: addr, data: result)
+            } else {
+                throw Error.undefinedInstruction
+            }
+
+            registers.updateZero(for: UInt16(result))
+            registers.updateSign(for: UInt16(result))
+
+        case .dea, .dex, .dey, .dec:
+            let result: UInt8
+
+            if case .dea = instruction.mnemonic {
+                registers.A -= 1
+                result = registers.A
+            } else if case .dex = instruction.mnemonic {
+                registers.X -= 1
+                result = registers.X
+            } else if case .dey = instruction.mnemonic {
+                registers.Y -= 1
+                result = registers.Y
+            } else if case .dec = instruction.mnemonic {
+                let addr = try instruction.addressingMode.address(from: memory, registers: registers)
+                result = try instruction.addressingMode.value(from: memory, registers: registers) - 1
+                try memory.write(to: addr, data: result)
+            } else {
+                throw Error.undefinedInstruction
+            }
+
+            registers.updateZero(for: UInt16(result))
+            registers.updateSign(for: UInt16(result))
             
         case .nop:
             // already updated PC, so nothing to do
             break
+
         case .undefined:
             throw Error.undefinedInstruction
         }

@@ -38,6 +38,18 @@ extension Instruction.Mnemonic {
         static let tsx: [UInt8] = [0xBA]
         static let txs: [UInt8] = [0x9A]
 
+        // MARK: - Incremement
+        static let ina: [UInt8] = [0x1A]
+        static let inx: [UInt8] = [0xE8]
+        static let iny: [UInt8] = [0xC8]
+        static let inc: [UInt8] = [0xE6, 0xEE, 0xF6, 0xFE]
+
+        // MARK: - Decrement
+        static let dea: [UInt8] = [0x3A]
+        static let dex: [UInt8] = [0xCA]
+        static let dey: [UInt8] = [0x88]
+        static let dec: [UInt8] = [0xC6, 0xCE, 0xD6, 0xDE]
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }

@@ -31,9 +31,9 @@ public struct Instruction {
     }
 
     /// the number of rising edge clock ticks this instruction would have taken on a real MPU
-    public var ticks: UInt8 {
-        return 2 // TODO: need to figure this out!
-    }
+//    public var ticks: UInt8 {
+//        return 2 // TODO: need to figure this out!
+//    }
 
     /// creates an instruction from memory with given register state.
     init(memory: MemoryAddressable, registers: Registers) throws {

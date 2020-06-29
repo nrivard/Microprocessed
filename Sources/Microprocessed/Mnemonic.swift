@@ -38,6 +38,18 @@ extension Instruction {
         case tsx
         case txs
 
+        // MARK: - Increment
+        case ina
+        case inx
+        case iny
+        case inc
+
+        // MARK: - Decrement
+        case dea
+        case dex
+        case dey
+        case dec
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -82,6 +94,24 @@ extension Instruction {
                 self = .tsx
             case Opcodes.txs:
                 self = .txs
+
+            case Opcodes.ina:
+                self = .ina
+            case Opcodes.inx:
+                self = .inx
+            case Opcodes.iny:
+                self = .iny
+            case Opcodes.inc:
+                self = .inc
+
+            case Opcodes.dea:
+                self = .dea
+            case Opcodes.dex:
+                self = .dex
+            case Opcodes.dey:
+                self = .dey
+            case Opcodes.dec:
+                self = .dec
 
             case Opcodes.noop:
                 self = .nop
