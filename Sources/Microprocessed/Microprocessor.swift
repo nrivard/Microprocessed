@@ -189,6 +189,21 @@ extension Microprocessor {
             registers.updateCarry(for: result)
 
             try save(result, addressingMode: instruction.addressingMode)
+
+        case .lsr:
+            let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
+            let result = value >> 1
+
+            registers.updateZero(for: result)
+            registers.updateSign(for: result)
+
+            if value & 0x0001 > 0 {
+                registers.updateCarry(for: 0xFF00)
+            } else {
+                registers.updateCarry(for: 0x0000)
+            }
+
+            try save(result, addressingMode: instruction.addressingMode)
             
         case .nop:
             // already updated PC, so nothing to do

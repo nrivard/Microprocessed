@@ -52,7 +52,7 @@ extension Instruction {
 
         // MARK: - Shift
         case asl
-//        case lsr
+        case lsr
 //        case rol
 //        case ror
 
@@ -121,6 +121,8 @@ extension Instruction {
 
             case Opcodes.asl:
                 self = .asl
+            case Opcodes.lsr:
+                self = .lsr
 
             case Opcodes.noop:
                 self = .nop

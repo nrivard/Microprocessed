@@ -52,7 +52,7 @@ extension Instruction.Mnemonic {
 
         // MARK: - Shift
         static let asl: [UInt8] = [0x06, 0x0A, 0x0E, 0x16, 0x1E]
-        static let lsr: [UInt8] = []
+        static let lsr: [UInt8] = [0x46, 0x4A, 0x4E, 0x56, 0x5E]
         static let rol: [UInt8] = []
         static let ror: [UInt8] = []
 
