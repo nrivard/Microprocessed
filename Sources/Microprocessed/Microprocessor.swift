@@ -63,12 +63,18 @@ extension Microprocessor {
     /// execute the instruction and update status register
     func execute(_ instruction: Instruction) throws {
         switch instruction.mnemonic {
-        case .lda:
-            registers.A = try instruction.addressingMode.value(from: memory, registers: registers)
-        case .ldx:
-            registers.X = try instruction.addressingMode.value(from: memory, registers: registers)
-        case .ldy:
-            registers.Y = try instruction.addressingMode.value(from: memory, registers: registers)
+        case .lda, .ldx, .ldy:
+            let result = try instruction.addressingMode.value(from: memory, registers: registers)
+            registers.updateZero(for: UInt16(result))
+            registers.updateSign(for: UInt16(result))
+
+            if case .lda = instruction.mnemonic {
+                registers.A = result
+            } else if case .ldx = instruction.mnemonic {
+                registers.X = result
+            } else if case .ldy = instruction.mnemonic {
+                registers.Y = result
+            }
         case .nop:
             // already updated PC, so nothing to do
             break

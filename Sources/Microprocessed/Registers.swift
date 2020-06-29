@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Registers.swift
 //  
 //
 //  Created by Nate Rivard on 25/06/2020.
@@ -11,23 +11,27 @@ import Foundation
 public struct Registers: Equatable, Hashable {
     
     /// accumulator
-    var A: UInt8 = 0
+    public var A: UInt8 = 0
     
     /// X index
-    var X: UInt8 = 0
+    public var X: UInt8 = 0
     
     /// Y index
-    var Y: UInt8 = 0
+    public var Y: UInt8 = 0
     
     /// Stack pointer offset
-    var SP: UInt8 = 0
+    public var SP: UInt8 = 0
     
     /// Status register
-    var SR: UInt8 = 0
+    public var SR: UInt8 = 0
     
     /// Program counter
-    var PC: UInt16 = 0
-    
+    public var PC: UInt16 = 0
+}
+
+extension Registers {
+
+    /// nicer interface into the status register that can be easily queried
     public var statusFlags: StatusFlags {
         return .init(rawValue: SR)
     }
@@ -59,8 +63,7 @@ extension Registers {
         }
     }
 
-    /// lifted from Mike Chamber's MoarNES and mathematically validated via
-    /// http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
+    /// lifted from Mike Chamber's MoarNES and mathematically validated via http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
     mutating func updateOverflow(for result: UInt16, leftOperand: UInt8, rightOperand: UInt8) {
         if (result ^ UInt16(leftOperand)) & (result ^ UInt16(rightOperand)) & 0x0080 > 0 {
             SR |= StatusFlags.didOverflow.rawValue
@@ -69,13 +72,3 @@ extension Registers {
         }
     }
 }
-
-extension Registers {
-
-    /// ADC and SBC use temporary 16 bit values to do calculations. This is a convenience to save only the lower half of that value
-    /// to the 8-bit A register
-    mutating func saveAccumulator(with newValue: UInt16) {
-        A = UInt8(newValue & 0x00FF)
-    }
-}
-

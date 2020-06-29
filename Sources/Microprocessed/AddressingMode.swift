@@ -13,18 +13,19 @@ extension Instruction {
         public enum Error: Swift.Error {
             case unknown
             case noAssociatedValue
+            case incorrectValueType
         }
 
         case implied
         case accumulator
         case stack
         case immediate(value: UInt8)
-//        case absolute(address: UInt16)
+        case absolute(address: UInt16)
 //        case absoluteIndexed(address: UInt16, offset: UInt8)
 //        case absoluteIndirect(address: UInt16)
         case zeroPage(address: UInt8)
 //        case zeroPageIndexed(address: UInt8, offset: UInt8)
-//        case relative(offset: Int8)
+        case relative(offset: Int8)
 
         public init(_ opcode: UInt8, memory: MemoryAddressable, registers: Registers) throws {
             typealias Opcodes = Instruction.AddressingMode.Opcodes
@@ -32,16 +33,32 @@ extension Instruction {
             switch opcode {
             case Opcodes.implied:
                 self = .implied
+
             case Opcodes.accumulator:
                 self = .accumulator
+
             case Opcodes.stack:
                 self = .stack
+
             case Instruction.AddressingMode.Opcodes.immediate:
                 let value = try memory.read(from: registers.PC + 1)
                 self = .immediate(value: value)
+
+            case Instruction.AddressingMode.Opcodes.absolute:
+                let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
+                self = .absolute(address: addr)
+
+//            case Instruction.AddressingMode.Opcodes.absoluteIndexed:
+//                let addr =
+
             case Instruction.AddressingMode.Opcodes.zeroPage:
                 let addr = try memory.read(from: registers.PC + 1)
                 self = .zeroPage(address: addr)
+
+            case Instruction.AddressingMode.Opcodes.relative:
+                let offset = try memory.read(from: registers.PC + 1)
+                self = .relative(offset: Int8(bitPattern: offset))
+
             default:
                 throw Instruction.AddressingMode.Error.unknown
             }
@@ -59,6 +76,25 @@ extension Instruction.AddressingMode {
         case .zeroPage(let addr):
             return try memory.read(from: UInt16(addr))
 
+        case .absolute(let addr):
+            return try memory.read(from: addr)
+
+        case .implied, .accumulator, .stack:
+            throw Error.noAssociatedValue
+
+        case .relative:
+            throw Error.incorrectValueType
+        }
+    }
+
+    public func word(from memory: MemoryAddressable, registers: Registers) throws -> UInt16 {
+        switch self {
+        case .relative(let offset):
+            return UInt16(Int32(registers.PC) + Int32(offset))
+
+        case .immediate, .zeroPage, .absolute:
+            throw Error.incorrectValueType
+
         case .implied, .accumulator, .stack:
             throw Error.noAssociatedValue
         }
@@ -72,8 +108,18 @@ extension Instruction.AddressingMode: Equatable, Hashable {
         case (.immediate(let left), .immediate(let right)),
              (.zeroPage(let left), .zeroPage(let right)):
             return left == right
-        case (.implied, .implied):
+
+        case (.relative(let left), .relative(let right)):
+            return left == right
+
+        case (.absolute(let left), .absolute(let right)):
+            return left == right
+
+        case (.implied, .implied),
+             (.stack, .stack),
+             (.accumulator, .accumulator):
             return true
+
         default:
             return false
         }

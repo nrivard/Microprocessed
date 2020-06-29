@@ -23,8 +23,10 @@ public struct Instruction {
         switch addressingMode {
         case .implied, .stack, .accumulator:
             return 1
-        case .immediate, .zeroPage:
+        case .immediate, .zeroPage, .relative:
             return 2
+        case .absolute:
+            return 3
         }
     }
 
@@ -39,6 +41,7 @@ public struct Instruction {
         self.addressingMode = try AddressingMode(opcode, memory: memory, registers: registers)
     }
 
+    /// create a hardcoded instruction. potentially useful for testing
     init(opcode: UInt8, addressingMode: AddressingMode) {
         self.opcode = opcode
         self.addressingMode = addressingMode
