@@ -139,17 +139,17 @@ extension Microprocessor {
             let result: UInt8
 
             if case .ina = instruction.mnemonic {
-                registers.A += 1
-                result = registers.A
+                result = registers.A &+ 1
+                registers.A = result
             } else if case .inx = instruction.mnemonic {
-                registers.X += 1
-                result = registers.X
+                result = registers.X &+ 1
+                registers.X = result
             } else if case .iny = instruction.mnemonic {
-                registers.Y += 1
-                result = registers.Y
+                result = registers.Y &+ 1
+                registers.Y = result
             } else if case .inc = instruction.mnemonic {
                 let addr = try instruction.addressingMode.address(from: memory, registers: registers)
-                result = try instruction.addressingMode.value(from: memory, registers: registers) + 1
+                result = try instruction.addressingMode.value(from: memory, registers: registers) &+ 1
                 try memory.write(to: addr, data: result)
             } else {
                 throw Error.undefinedInstruction
@@ -162,17 +162,17 @@ extension Microprocessor {
             let result: UInt8
 
             if case .dea = instruction.mnemonic {
-                registers.A -= 1
-                result = registers.A
+                result = registers.A &- 1
+                registers.A = result
             } else if case .dex = instruction.mnemonic {
-                registers.X -= 1
-                result = registers.X
+                result = registers.X &- 1
+                registers.X = result
             } else if case .dey = instruction.mnemonic {
-                registers.Y -= 1
-                result = registers.Y
+                result = registers.Y &- 1
+                registers.Y = result
             } else if case .dec = instruction.mnemonic {
                 let addr = try instruction.addressingMode.address(from: memory, registers: registers)
-                result = try instruction.addressingMode.value(from: memory, registers: registers) - 1
+                result = try instruction.addressingMode.value(from: memory, registers: registers) &- 1
                 try memory.write(to: addr, data: result)
             } else {
                 throw Error.undefinedInstruction

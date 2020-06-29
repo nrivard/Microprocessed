@@ -11,5 +11,12 @@ final class DEXTests: SystemTests {
         XCTAssert(mpu.registers.X == 0xD3)
         XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+
+        mpu.registers.X = 0x00
+
+        try mpu.execute(opcode)
+        XCTAssert(mpu.registers.X == 0xFF)
+        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
     }
 }

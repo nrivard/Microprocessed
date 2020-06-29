@@ -11,5 +11,12 @@ final class DEATests: SystemTests {
         XCTAssert(mpu.registers.A == 0xD3)
         XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+
+        mpu.registers.A = 0x00
+        
+        try mpu.execute(opcode)
+        XCTAssert(mpu.registers.A == 0xFF)
+        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
     }
 }

@@ -11,5 +11,12 @@ final class DEYTests: SystemTests {
         XCTAssert(mpu.registers.Y == 0xD3)
         XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+
+        mpu.registers.Y = 0x00
+
+        try mpu.execute(opcode)
+        XCTAssert(mpu.registers.Y == 0xFF)
+        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
     }
 }

@@ -11,6 +11,13 @@ final class DECTests: SystemTests {
         XCTAssert(try ram.read(from: 0x0010) == opcode &- 1)
         XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+
+        try ram.write(to: 0x011, data: 0x00)
+
+        try mpu.execute(opcode, data: 0x11)
+        XCTAssert(try ram.read(from: 0x0011)  == 0xFF)
+        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
     }
 
     func testDECZeroPageIndexed() throws {

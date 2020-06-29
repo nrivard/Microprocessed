@@ -11,5 +11,12 @@ final class INXTests: SystemTests {
         XCTAssert(mpu.registers.X == 0xD5)
         XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+
+        mpu.registers.X = 0xFF
+
+        try mpu.execute(opcode)
+        XCTAssert(mpu.registers.X == 0x00)
+        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
     }
 }
