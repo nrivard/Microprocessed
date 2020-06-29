@@ -23,9 +23,9 @@ public struct Instruction {
         switch addressingMode {
         case .implied, .stack, .accumulator:
             return 1
-        case .immediate, .zeroPage, .relative:
+        case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect:
             return 2
-        case .absolute:
+        case .absolute, .absoluteIndexed, .absoluteIndirect:
             return 3
         }
     }

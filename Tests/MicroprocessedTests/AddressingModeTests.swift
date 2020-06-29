@@ -14,7 +14,7 @@ final class AddressingModeTests: SystemTests {
             Opcodes.absoluteIndexedIndirect,
             Opcodes.absoluteIndexedX,
             Opcodes.absoluteIndexedY,
-            Opcodes.absoluteIndrect,
+            Opcodes.absoluteIndirect,
             Opcodes.relative,
             Opcodes.accumulator,
             Opcodes.implied,
@@ -134,6 +134,56 @@ final class AddressingModeTests: SystemTests {
         }
     }
 
+    func testAbsoluteIndex() throws {
+        let absolutePageBase: UInt16 = 0x6000
+
+        func testAbsoluteIndexedOpcode(_ opcode: UInt8, atIndex index: UInt8, registerIsX: Bool) throws {
+            try ram.write(to: absolutePageBase + UInt16(index), data: opcode &+ 1)
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(toAddressStartingAt: mpu.registers.PC + 1, word: absolutePageBase)
+
+            if registerIsX {
+                mpu.registers.X = index
+            } else {
+                mpu.registers.Y = index
+            }
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .absoluteIndexed(address: absolutePageBase, offset: index))
+            XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
+
+            // doesn't support word mode
+            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+        }
+
+        for (index, opcode) in Opcodes.absoluteIndexedX.enumerated() {
+            try testAbsoluteIndexedOpcode(opcode, atIndex: UInt8(index), registerIsX: true)
+        }
+
+        for (index, opcode) in Opcodes.absoluteIndexedY.enumerated() {
+            try testAbsoluteIndexedOpcode(opcode, atIndex: UInt8(index), registerIsX: false)
+        }
+    }
+
+    func testAbsoluteIndirect() throws {
+        let indirectBase: UInt16 = 0x3456
+
+        // there's really only one but let's just follow convention blindly, shall we?
+        for opcode in Opcodes.absoluteIndirect {
+            try ram.write(toAddressStartingAt: indirectBase, word: 0x9000)
+
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(toAddressStartingAt: mpu.registers.PC + 1, word: indirectBase)
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .absoluteIndirect(address: indirectBase))
+            XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == 0x9000)
+
+            // doesn't support value mode
+            XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
+        }
+    }
+
     func testRelative() throws {
         let negativeOffset = Int8(-120)
         let positiveOffset = Int8(120)
@@ -149,6 +199,9 @@ final class AddressingModeTests: SystemTests {
 
             let resolvedAddress = UInt16(bitPattern: Int16(offset)) &+ mpu.registers.PC
             XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == resolvedAddress)
+
+            // doesn't support value mode
+            XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
         }
     }
 
@@ -162,6 +215,59 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .zeroPage(address: UInt8(index)))
+            XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
+
+            // doesn't support word mode
+            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+        }
+    }
+
+    func testZeroPagedIndexed() throws {
+        let zeroPageBase: UInt8 = 0x80
+
+        func testZeroPagedIndexedOpcode(_ opcode: UInt8, atIndex index: UInt8, registerIsX: Bool) throws {
+            try ram.write(to: UInt16(zeroPageBase + index), data: opcode &+ 1)
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(to: mpu.registers.PC + 1, data: zeroPageBase)
+
+            if registerIsX {
+                mpu.registers.X = index
+            } else {
+                mpu.registers.Y = index
+            }
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .zeroPageIndexed(address: zeroPageBase, offset: index))
+            XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
+
+            // doesn't support word mode
+            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+        }
+
+        for (index, opcode) in Opcodes.zeroPageIndexedX.enumerated() {
+            try testZeroPagedIndexedOpcode(opcode, atIndex: UInt8(index), registerIsX: true)
+        }
+
+        for (index, opcode) in Opcodes.zeroPageIndexedY.enumerated() {
+            try testZeroPagedIndexedOpcode(opcode, atIndex: UInt8(index), registerIsX: false)
+        }
+    }
+
+    func testZeroPageIndirect() throws {
+        let indirectBase: UInt16 = 0x0666
+
+        for (index, opcode) in Opcodes.zeroPageIndirect.enumerated() {
+            // write the eventual value
+            try ram.write(to: indirectBase + UInt16(index), data: opcode &+ 1)
+
+            // write resolved addr to zero page address
+            try ram.write(toAddressStartingAt: UInt16(index * 2), word: indirectBase + UInt16(index))
+
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(to: mpu.registers.PC + 1, data: UInt8(index * 2))
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .zeroPageIndirect(address: UInt8(index * 2)))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
 
             // doesn't support word mode
