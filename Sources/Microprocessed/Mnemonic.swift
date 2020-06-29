@@ -22,6 +22,22 @@ extension Instruction {
         case sty
         case stz
 
+        // MARK: - Push Stack
+        case pha
+        case phx
+        case phy
+        case php
+
+        // MARK: - Pull Stack
+        case pla
+        case plx
+        case ply
+        case plp
+
+        // MARK: - Transfer Stack
+        case tsx
+        case txs
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -43,6 +59,29 @@ extension Instruction {
                 self = .sty
             case Opcodes.stz:
                 self = .stz
+
+            case Opcodes.pha:
+                self = .pha
+            case Opcodes.phx:
+                self = .phx
+            case Opcodes.phy:
+                self = .phy
+            case Opcodes.php:
+                self = .php
+
+            case Opcodes.pla:
+                self = .pla
+            case Opcodes.plx:
+                self = .plx
+            case Opcodes.ply:
+                self = .ply
+            case Opcodes.plp:
+                self = .plp
+
+            case Opcodes.tsx:
+                self = .tsx
+            case Opcodes.txs:
+                self = .txs
 
             case Opcodes.noop:
                 self = .nop

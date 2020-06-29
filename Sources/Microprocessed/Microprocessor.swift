@@ -91,6 +91,49 @@ extension Microprocessor {
             }
 
             try memory.write(to: addr, data: registerValue)
+
+        case .pha, .phx, .phy, .php:
+            let registerValue: UInt8
+
+            if case .pha = instruction.mnemonic {
+                registerValue = registers.A
+            } else if case .phx = instruction.mnemonic {
+                registerValue = registers.X
+            } else if case .phy = instruction.mnemonic {
+                registerValue = registers.Y
+            } else if case .php = instruction.mnemonic {
+                registerValue = registers.SR
+            } else {
+                throw Error.undefinedInstruction
+            }
+
+            try push(registerValue)
+
+        case .pla, .plx, .ply, .plp:
+            let result = try pop()
+            registers.updateZero(for: UInt16(result))
+            registers.updateSign(for: UInt16(result))
+
+            if case .pla = instruction.mnemonic {
+                registers.A = result
+            } else if case .plx = instruction.mnemonic {
+                registers.X = result
+            } else if case .ply = instruction.mnemonic {
+                registers.Y = result
+            } else if case .plp = instruction.mnemonic {
+                // this should actually overwrite the status flag updates we just did which is good
+                registers.SR = result
+            } else {
+                throw Error.undefinedInstruction
+            }
+
+        case .txs:
+            registers.SP = registers.X
+
+        case .tsx:
+            registers.X = registers.SP
+            registers.updateZero(for: UInt16(registers.X))
+            registers.updateSign(for: UInt16(registers.X))
             
         case .nop:
             // already updated PC, so nothing to do

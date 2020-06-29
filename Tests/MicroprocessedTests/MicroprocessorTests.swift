@@ -24,21 +24,15 @@ final class MicroprocessorTests: SystemTests {
         try mpu.testLoadImmediateStatusFlags(for: 0xA2)
         try mpu.testLoadImmediateStatusFlags(for: 0xA0)
     }
-
-    // MARK: - NOP
-
-    func testNOP() throws {
-        let previousRegisters = mpu.registers
-
-        let opcode: UInt8 = Instruction.Mnemonic.Opcodes.noop[0]
-        try ram.write(to: mpu.registers.PC, data: opcode)
-
-        try mpu.tick()
-        // TODO: verify registers are exactly the same _except_ for PC which should be PC + 1
-    }
 }
 
 extension Microprocessor {
+
+    /// convenience for executing an operandless opcode
+    func execute(_ opcode: UInt8) throws {
+        try memory.write(to: registers.PC, data: opcode)
+        try tick()
+    }
 
     /// convenience that writes an opcode and data, then executes it
     func execute(_ opcode: UInt8, data: UInt8) throws {

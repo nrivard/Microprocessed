@@ -22,6 +22,22 @@ extension Instruction.Mnemonic {
         static let sty: [UInt8] = [0x84, 0x8C, 0x94]
         static let stz: [UInt8] = [0x64, 0x74, 0x9C, 0x9E]
 
+        // MARK: - Push Stack
+        static let pha: [UInt8] = [0x48]
+        static let phx: [UInt8] = [0xDA]
+        static let phy: [UInt8] = [0x5A]
+        static let php: [UInt8] = [0x08]
+
+        // MARK: - Pop Stack
+        static let pla: [UInt8] = [0x68]
+        static let plx: [UInt8] = [0xFA]
+        static let ply: [UInt8] = [0x7A]
+        static let plp: [UInt8] = [0x28]
+
+        // MARK: - Transfer Stack
+        static let tsx: [UInt8] = [0xBA]
+        static let txs: [UInt8] = [0x9A]
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }
