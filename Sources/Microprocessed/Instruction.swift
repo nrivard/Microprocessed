@@ -23,9 +23,9 @@ public struct Instruction {
         switch addressingMode {
         case .implied, .stack, .accumulator:
             return 1
-        case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect:
+        case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect:
             return 2
-        case .absolute, .absoluteIndexed, .absoluteIndirect:
+        case .absolute, .absoluteIndexed, .absoluteIndirect, .absoluteIndexedIndirect:
             return 3
         }
     }
@@ -41,9 +41,9 @@ public struct Instruction {
         self.addressingMode = try AddressingMode(opcode, memory: memory, registers: registers)
     }
 
-    /// create a hardcoded instruction. potentially useful for testing
-    init(opcode: UInt8, addressingMode: AddressingMode) {
-        self.opcode = opcode
-        self.addressingMode = addressingMode
-    }
+//    /// create a hardcoded instruction. potentially useful for testing
+//    init(opcode: UInt8, addressingMode: AddressingMode) {
+//        self.opcode = opcode
+//        self.addressingMode = addressingMode
+//    }
 }

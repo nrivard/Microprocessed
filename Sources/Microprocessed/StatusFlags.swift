@@ -40,10 +40,3 @@ public struct StatusFlags: OptionSet {
         self.rawValue = rawValue
     }
 }
-
-extension StatusFlags {
-
-    func updateZero(for value: UInt8) {
-        
-    }
-}

@@ -22,9 +22,11 @@ extension Instruction {
         case immediate(value: UInt8)
         case absolute(address: UInt16)
         case absoluteIndexed(address: UInt16, offset: UInt8)
+        case absoluteIndexedIndirect(address: UInt16, offset: UInt8)
         case absoluteIndirect(address: UInt16)
         case zeroPage(address: UInt8)
         case zeroPageIndexed(address: UInt8, offset: UInt8)
+        case zeroPageIndexedIndirect(address: UInt8, offset: UInt8)
         case zeroPageIndirect(address: UInt8)
         case relative(offset: Int8)
 
@@ -59,6 +61,15 @@ extension Instruction {
                 let offset = registers.Y
                 self = .absoluteIndexed(address: addr, offset: offset)
 
+            case Instruction.AddressingMode.Opcodes.absoluteIndirect:
+                let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
+                self = .absoluteIndirect(address: addr)
+
+            case Instruction.AddressingMode.Opcodes.absoluteIndexedIndirect:
+                let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
+                let offset = registers.X
+                self = .absoluteIndexedIndirect(address: addr, offset: offset)
+
             case Instruction.AddressingMode.Opcodes.zeroPage:
                 let addr = try memory.read(from: registers.PC + 1)
                 self = .zeroPage(address: addr)
@@ -77,13 +88,14 @@ extension Instruction {
                 let addr = try memory.read(from: registers.PC + 1)
                 self = .zeroPageIndirect(address: addr)
 
+            case Instruction.AddressingMode.Opcodes.zeroPageIndexedIndirect:
+                let addr = try memory.read(from: registers.PC + 1)
+                let offset = registers.X
+                self = .zeroPageIndexedIndirect(address: addr, offset: offset)
+
             case Instruction.AddressingMode.Opcodes.relative:
                 let offset = try memory.read(from: registers.PC + 1)
                 self = .relative(offset: Int8(bitPattern: offset))
-
-            case Instruction.AddressingMode.Opcodes.absoluteIndirect:
-                let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
-                self = .absoluteIndirect(address: addr)
 
             default:
                 throw Instruction.AddressingMode.Error.unknown
@@ -109,6 +121,10 @@ extension Instruction.AddressingMode {
             let resolvedAddr = try memory.readWord(fromAddressStartingAt:  UInt16(addr))
             return try memory.read(from: UInt16(resolvedAddr))
 
+        case .zeroPageIndexedIndirect(let addr, let offset):
+            let resolvedAddr = try memory.readWord(fromAddressStartingAt: UInt16(addr + offset))
+            return try memory.read(from: resolvedAddr)
+
         case .absolute(let addr):
             return try memory.read(from: addr)
 
@@ -118,7 +134,7 @@ extension Instruction.AddressingMode {
         case .implied, .accumulator, .stack:
             throw Error.noAssociatedValue
 
-        case .relative, .absoluteIndirect:
+        case .relative, .absoluteIndirect, .absoluteIndexedIndirect:
             throw Error.incorrectValueType
         }
     }
@@ -131,7 +147,11 @@ extension Instruction.AddressingMode {
         case .absoluteIndirect(let addr):
             return try memory.readWord(fromAddressStartingAt: addr)
 
-        case .immediate, .zeroPage, .absolute, .zeroPageIndexed, .absoluteIndexed, .zeroPageIndirect:
+        case .absoluteIndexedIndirect(let addr, let offset):
+            let resolvedAddr = try memory.readWord(fromAddressStartingAt: addr + UInt16(offset))
+            return try memory.readWord(fromAddressStartingAt: resolvedAddr)
+
+        case .immediate, .zeroPage, .absolute, .zeroPageIndexed, .absoluteIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect:
             throw Error.incorrectValueType
 
         case .implied, .accumulator, .stack:
@@ -156,10 +176,12 @@ extension Instruction.AddressingMode: Equatable, Hashable {
              (.absoluteIndirect(let left), .absoluteIndirect(let right)):
             return left == right
 
-        case (.zeroPageIndexed(let leftAddr, let leftOffset), .zeroPageIndexed(let rightAddr, let rightOffset)):
+        case (.zeroPageIndexed(let leftAddr, let leftOffset), .zeroPageIndexed(let rightAddr, let rightOffset)),
+             (.zeroPageIndexedIndirect(let leftAddr, let leftOffset), .zeroPageIndexedIndirect(let rightAddr, let rightOffset)):
             return leftAddr == rightAddr && leftOffset == rightOffset
 
-        case (.absoluteIndexed(let leftAddr, let leftOffset), .absoluteIndexed(let rightAddr, let rightOffset)):
+        case (.absoluteIndexed(let leftAddr, let leftOffset), .absoluteIndexed(let rightAddr, let rightOffset)),
+             (.absoluteIndexedIndirect(let leftAddr, let leftOffset), .absoluteIndexedIndirect(let rightAddr, let rightOffset)):
             return leftAddr == rightAddr && leftOffset == rightOffset
 
         case (.implied, .implied),

@@ -64,9 +64,18 @@ final class AddressingModeTests: SystemTests {
         XCTAssert(try testOpcode(Opcodes.implied[0], expectedSize: 1))
         XCTAssert(try testOpcode(Opcodes.stack[0], expectedSize: 1))
         XCTAssert(try testOpcode(Opcodes.immediate[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.zeroPage[0], expectedSize: 2))
         XCTAssert(try testOpcode(Opcodes.absolute[0], expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndexedX[0], expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndexedY[0], expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndirect[0], expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndexedIndirect[0], expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.zeroPage[0], expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedX[0], expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedY[0], expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndirect[0], expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedIndirect[0], expectedSize: 2))
         XCTAssert(try testOpcode(Opcodes.relative[0], expectedSize: 2))
+
     }
 
     func testImplied() throws {
@@ -170,14 +179,37 @@ final class AddressingModeTests: SystemTests {
 
         // there's really only one but let's just follow convention blindly, shall we?
         for opcode in Opcodes.absoluteIndirect {
-            try ram.write(toAddressStartingAt: indirectBase, word: 0x9000)
+            try ram.write(toAddressStartingAt: indirectBase, word: UInt16(opcode &+ 1))
 
             try ram.write(to: mpu.registers.PC, data: opcode)
             try ram.write(toAddressStartingAt: mpu.registers.PC + 1, word: indirectBase)
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .absoluteIndirect(address: indirectBase))
-            XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == 0x9000)
+            XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == UInt16(opcode &+ 1))
+
+            // doesn't support value mode
+            XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
+        }
+    }
+
+    func testAbsoluteIndexedIndirect() throws {
+        let indirectBase: UInt16 = 0xDEAD
+        let resolvedBase: UInt16 = 0x0BAE
+
+        for (index, opcode) in Opcodes.absoluteIndexedIndirect.enumerated() {
+            // there's only one opcode so let's inject a value for index here
+            let synthesizedIndex = UInt8(index + 2)
+            try ram.write(toAddressStartingAt: resolvedBase, word: UInt16(opcode &+ 1))
+            try ram.write(toAddressStartingAt: indirectBase + UInt16(synthesizedIndex), word: resolvedBase)
+
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(toAddressStartingAt: mpu.registers.PC + 1, word: indirectBase)
+            mpu.registers.X = synthesizedIndex
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .absoluteIndexedIndirect(address: indirectBase, offset: synthesizedIndex))
+            XCTAssert(try addressingMode.word(from: ram, registers: mpu.registers) == UInt16(opcode &+ 1))
 
             // doesn't support value mode
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
@@ -268,6 +300,27 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .zeroPageIndirect(address: UInt8(index * 2)))
+            XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
+
+            // doesn't support word mode
+            XCTAssertThrowsError(try addressingMode.word(from: ram, registers: mpu.registers))
+        }
+    }
+
+    func testZeroPageIndexedIndirect() throws {
+        let zeroPageBase: UInt8 = 0xA0
+        let resolvedBase: UInt16 = 0xB00F
+
+        for (index, opcode) in Opcodes.zeroPageIndexedIndirect.enumerated() {
+            try ram.write(to: resolvedBase + UInt16(index), data: opcode &+ 1)
+            try ram.write(toAddressStartingAt: UInt16(zeroPageBase) + UInt16(index), word: resolvedBase + UInt16(index))
+
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(to: mpu.registers.PC + 1, data: zeroPageBase)
+            mpu.registers.X = UInt8(index)
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .zeroPageIndexedIndirect(address: zeroPageBase, offset: UInt8(index)))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
 
             // doesn't support word mode
