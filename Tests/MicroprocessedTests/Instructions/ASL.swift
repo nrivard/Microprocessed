@@ -13,11 +13,11 @@ final class ASLTests: SystemTests {
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.A == ASLTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.A == ASLTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testASLZeroPage() throws {
@@ -26,11 +26,11 @@ final class ASLTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x20)
         XCTAssert(try ram.read(from: 0x0020) == ASLTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, data: 0x20)
         XCTAssert(try ram.read(from: 0x0020) == ASLTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testASLZeroPageIndexed() throws {
@@ -40,25 +40,25 @@ final class ASLTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x10)
         XCTAssert(try ram.read(from: 0x0020) == ASLTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, data: 0x10)
         XCTAssert(try ram.read(from: 0x0020) == ASLTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testASLAbsolute() throws {
         let opcode: UInt8 = 0x0E
         let address: UInt16 = 0x1190
-        try ram.write(to: 0x1190, data: ASLTests.startValue)
+        try ram.write(to: address, data: ASLTests.startValue)
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address) == ASLTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address) == ASLTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testASLAbsoluteIndexed() throws {
@@ -69,23 +69,23 @@ final class ASLTests: SystemTests {
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address + 0x10) == ASLTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address + 0x10) == ASLTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 }
 
 extension ASLTests {
 
-    private func testNextStatusFlags() {
+    private func assertNextStatusFlags() {
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
         XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.didCarry))
     }
 
-    private func testEndStatusFlags() {
+    private func assertEndStatusFlags() {
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssert(mpu.registers.statusFlags.contains(.didCarry))

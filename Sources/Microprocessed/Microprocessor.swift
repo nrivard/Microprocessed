@@ -38,6 +38,7 @@ public class Microprocessor {
         registers.X = 0
         registers.Y = 0
         registers.SP = 0xFF
+        registers.SR = StatusFlags.alwaysSet.rawValue
     }
 
     /// send a single clock rising edge pulse to the `Microprocessor`
@@ -197,10 +198,35 @@ extension Microprocessor {
             registers.updateZero(for: result)
             registers.updateSign(for: result)
 
-            if value & 0x0001 > 0 {
-                registers.updateCarry(for: 0xFF00)
+            if value & 0x1 > 0 {
+                registers.setCarry()
             } else {
-                registers.updateCarry(for: 0x0000)
+                registers.clearCarry()
+            }
+
+            try save(result, addressingMode: instruction.addressingMode)
+
+        case .rol:
+            let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
+            let result = (value << 1) | (registers.statusFlags.contains(.didCarry) ? 1 : 0)
+
+            registers.updateZero(for: result)
+            registers.updateSign(for: result)
+            registers.updateCarry(for: result)
+
+            try save(result, addressingMode: instruction.addressingMode)
+
+        case .ror:
+            let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
+            let result = (value >> 1) | UInt16(registers.statusFlags.contains(.didCarry) ? (1 << 7) : 0)
+
+            registers.updateZero(for: result)
+            registers.updateSign(for: result)
+
+            if value & 0x1 > 0 {
+                registers.setCarry()
+            } else {
+                registers.clearCarry()
             }
 
             try save(result, addressingMode: instruction.addressingMode)

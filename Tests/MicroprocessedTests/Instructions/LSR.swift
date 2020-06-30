@@ -13,11 +13,11 @@ final class LSRTests: SystemTests {
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.A == LSRTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.A == LSRTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testLSRZeroPage() throws {
@@ -26,11 +26,11 @@ final class LSRTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x20)
         XCTAssert(try ram.read(from: 0x0020) == LSRTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, data: 0x20)
         XCTAssert(try ram.read(from: 0x0020) == LSRTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testLSRZeroPageIndexed() throws {
@@ -40,11 +40,11 @@ final class LSRTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x10)
         XCTAssert(try ram.read(from: 0x0020) == LSRTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, data: 0x10)
         XCTAssert(try ram.read(from: 0x0020) == LSRTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testLSRAbsolute() throws {
@@ -54,11 +54,11 @@ final class LSRTests: SystemTests {
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address) == LSRTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address) == LSRTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 
     func testLSRAbsoluteIndexed() throws {
@@ -69,23 +69,23 @@ final class LSRTests: SystemTests {
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address + 0x10) == LSRTests.nextValue)
-        testNextStatusFlags()
+        assertNextStatusFlags()
 
         try mpu.execute(opcode, word: address)
         XCTAssert(try ram.read(from: address + 0x10) == LSRTests.endValue)
-        testEndStatusFlags()
+        assertEndStatusFlags()
     }
 }
 
 extension LSRTests {
 
-    private func testNextStatusFlags() {
+    private func assertNextStatusFlags() {
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.didCarry))
     }
 
-    private func testEndStatusFlags() {
+    private func assertEndStatusFlags() {
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
         XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
         XCTAssert(mpu.registers.statusFlags.contains(.didCarry))

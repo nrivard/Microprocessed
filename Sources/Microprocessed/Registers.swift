@@ -57,9 +57,9 @@ extension Registers {
 
     mutating func updateCarry(for result: UInt16) {
         if result & 0xFF00 > 0 {
-            SR |= StatusFlags.didCarry.rawValue
+            setCarry()
         } else {
-            SR &= ~StatusFlags.didCarry.rawValue
+            clearCarry()
         }
     }
 
@@ -70,5 +70,16 @@ extension Registers {
         } else {
             SR &= ~StatusFlags.didOverflow.rawValue
         }
+    }
+}
+
+extension Registers {
+
+    mutating func setCarry() {
+        SR |= StatusFlags.didCarry.rawValue
+    }
+
+    mutating func clearCarry() {
+        SR &= ~StatusFlags.didCarry.rawValue
     }
 }
