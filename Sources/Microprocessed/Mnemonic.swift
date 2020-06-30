@@ -60,6 +60,7 @@ extension Instruction {
         case and
         case ora
         case eor
+        case bit
 
         // MARK: - Miscellaneous
         case nop
@@ -139,6 +140,8 @@ extension Instruction {
                 self = .ora
             case Opcodes.eor:
                 self = .eor
+            case Opcodes.bit:
+                self = .bit
 
             case Opcodes.noop:
                 self = .nop

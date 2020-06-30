@@ -251,6 +251,17 @@ extension Microprocessor {
             registers.updateSign(for: result)
 
             registers.A = result.truncated
+
+        case .bit:
+            let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
+            let result = UInt16(registers.A) & value
+            registers.updateZero(for: result)
+
+            // clear bits 6 and 7
+            registers.SR &= 0x3F
+
+            // then copy bits 6 and 7 from memory location to SR
+            registers.SR |= UInt8(value & 0b1100_0000)
             
         case .nop:
             // already updated PC, so nothing to do
