@@ -59,6 +59,7 @@ extension Instruction {
         // MARK: - Logical Operations
         case and
         case ora
+        case eor
 
         // MARK: - Miscellaneous
         case nop
@@ -136,6 +137,8 @@ extension Instruction {
                 self = .and
             case Opcodes.ora:
                 self = .ora
+            case Opcodes.eor:
+                self = .eor
 
             case Opcodes.noop:
                 self = .nop
