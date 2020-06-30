@@ -56,6 +56,9 @@ extension Instruction {
         case rol
         case ror
 
+        // MARK: - Logical Operations
+        case and
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -127,6 +130,9 @@ extension Instruction {
                 self = .rol
             case Opcodes.ror:
                 self = .ror
+
+            case Opcodes.and:
+                self = .and
 
             case Opcodes.noop:
                 self = .nop

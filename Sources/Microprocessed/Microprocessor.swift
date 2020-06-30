@@ -230,6 +230,13 @@ extension Microprocessor {
             }
 
             try save(result, addressingMode: instruction.addressingMode)
+
+        case .and:
+            let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) & registers.A)
+            registers.updateZero(for: result)
+            registers.updateSign(for: result)
+
+            registers.A = result.truncated
             
         case .nop:
             // already updated PC, so nothing to do

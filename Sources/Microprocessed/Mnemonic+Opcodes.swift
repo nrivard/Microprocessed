@@ -56,6 +56,9 @@ extension Instruction.Mnemonic {
         static let rol: [UInt8] = [0x26, 0x2A, 0x2E, 0x36, 0x3E]
         static let ror: [UInt8] = [0x66, 0x6A, 0x6E, 0x76, 0x7E]
 
+        // MARK: - Logical Operations
+        static let and: [UInt8] = [0x21, 0x25, 0x29, 0x2D, 0x31, 0x32, 0x35, 0x39, 0x3D]
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }
