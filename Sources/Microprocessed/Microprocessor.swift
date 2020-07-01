@@ -316,6 +316,16 @@ extension Microprocessor {
 
         case .jmp:
             registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
+
+        case .jsr:
+            // writes the *address* of the last byte of the instruction to the stack
+            // this is effectively the current PC (which has already been incremented to the _next_ instruction) - 1
+            try pushWord(registers.PC - 1)
+            registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
+
+        case .rts:
+            // return address was stored as last byte of prev instruction, so add 1 to get to the actual return instruction address
+            registers.PC = try popWord() + 1
             
         case .nop:
             // already updated PC, so nothing to do

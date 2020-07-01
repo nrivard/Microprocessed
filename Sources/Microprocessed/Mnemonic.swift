@@ -79,6 +79,8 @@ extension Instruction {
 
         // MARK: - Jumps and Returns
         case jmp
+        case jsr
+        case rts
 
         // MARK: - Miscellaneous
         case nop
@@ -184,6 +186,10 @@ extension Instruction {
 
             case Opcodes.jmp:
                 self = .jmp
+            case Opcodes.jsr:
+                self = .jsr
+            case Opcodes.rts:
+                self = .rts
 
             case Opcodes.noop:
                 self = .nop
