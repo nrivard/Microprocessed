@@ -281,6 +281,18 @@ extension Microprocessor {
             registers.updateZero(for: result)
 
             try save(result, addressingMode: instruction.addressingMode)
+
+        case .rmb:
+            let mask: UInt8 = ~(1 << (instruction.opcode >> 4))
+            let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) & mask)
+
+            try save(result, addressingMode: instruction.addressingMode)
+            
+        case .smb:
+            let mask: UInt8 = 1 << ((instruction.opcode >> 4) - 0x08)
+            let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) | mask)
+
+            try save(result, addressingMode: instruction.addressingMode)
             
         case .nop:
             // already updated PC, so nothing to do

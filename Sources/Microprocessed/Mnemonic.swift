@@ -70,6 +70,8 @@ extension Instruction {
         // MARK: - Test and Reset Bits
         case trb
         case tsb
+        case rmb
+        case smb
 
         // MARK: - Miscellaneous
         case nop
@@ -163,6 +165,10 @@ extension Instruction {
                 self = .tsb
             case Opcodes.trb:
                 self = .trb
+            case Opcodes.smb:
+                self = .smb
+            case Opcodes.rmb:
+                self = .rmb
 
             case Opcodes.noop:
                 self = .nop

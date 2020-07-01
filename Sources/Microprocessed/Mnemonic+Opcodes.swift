@@ -69,6 +69,8 @@ extension Instruction.Mnemonic {
         // MARK: - Test and Reset Bits
         static let trb: [UInt8] = [0x14, 0x1C]
         static let tsb: [UInt8] = [0x04, 0x0C]
+        static let rmb: [UInt8] = [0x07, 0x17, 0x27, 0x37, 0x47, 0x57, 0x67, 0x77]
+        static let smb: [UInt8] = [0x87, 0x97, 0xA7, 0xB7, 0xC7, 0xD7, 0xE7, 0xF7]
 
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
