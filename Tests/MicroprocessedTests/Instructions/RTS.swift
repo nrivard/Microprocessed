@@ -3,7 +3,7 @@ import XCTest
 
 final class RTSTests: SystemTests {
 
-    func testJSR() throws {
+    func testRTS() throws {
         let opcode: UInt8 = 0x60
         let returnAddress: UInt16 = 0xA5DF
         try mpu.pushWord(returnAddress - 1)

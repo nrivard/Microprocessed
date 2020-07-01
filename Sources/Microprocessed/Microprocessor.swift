@@ -326,6 +326,11 @@ extension Microprocessor {
         case .rts:
             // return address was stored as last byte of prev instruction, so add 1 to get to the actual return instruction address
             registers.PC = try popWord() + 1
+
+        case .rti:
+            // restore status register first
+            registers.SR = try pop()
+            registers.PC = try popWord()
             
         case .nop:
             // already updated PC, so nothing to do

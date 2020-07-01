@@ -80,6 +80,7 @@ extension Instruction.Mnemonic {
         static let jmp: [UInt8] = [0x4C, 0x6C, 0x7C]
         static let jsr: [UInt8] = [0x20]
         static let rts: [UInt8] = [0x60]
+        static let rti: [UInt8] = [0x40]
 
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]

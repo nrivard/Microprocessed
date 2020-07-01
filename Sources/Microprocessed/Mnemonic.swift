@@ -81,6 +81,7 @@ extension Instruction {
         case jmp
         case jsr
         case rts
+        case rti
 
         // MARK: - Miscellaneous
         case nop
@@ -190,6 +191,8 @@ extension Instruction {
                 self = .jsr
             case Opcodes.rts:
                 self = .rts
+            case Opcodes.rti:
+                self = .rti
 
             case Opcodes.noop:
                 self = .nop
