@@ -4,7 +4,7 @@ import XCTest
 final class CPYTests: SystemTests {
 
     func testCPYImmediate() throws {
-        let opcode: UInt8 = 0xE0
+        let opcode: UInt8 = 0xC0
         mpu.registers.Y = 0xA0
 
         try mpu.execute(opcode, data: 0xA0)
@@ -15,7 +15,7 @@ final class CPYTests: SystemTests {
     }
 
     func testCPYZeroPage() throws {
-        let opcode: UInt8 = 0xE4
+        let opcode: UInt8 = 0xC4
         mpu.registers.Y = 0x80
         try ram.write(to: 0x0000, data: 0x8A)
 
@@ -27,7 +27,7 @@ final class CPYTests: SystemTests {
     }
 
     func testCPYAbsolute() throws {
-        let opcode: UInt8 = 0xEC
+        let opcode: UInt8 = 0xCC
         let address: UInt16 = 0xA5DF
         mpu.registers.Y = 0x80
         try ram.write(to: address, data: 0x01)
