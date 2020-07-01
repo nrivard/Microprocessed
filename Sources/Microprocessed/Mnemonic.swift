@@ -67,6 +67,10 @@ extension Instruction {
         case cpx
         case cpy
 
+        // MARK: - Test and Reset Bits
+        case trb
+        case tsb
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -154,6 +158,11 @@ extension Instruction {
                 self = .cpx
             case Opcodes.cpy:
                 self = .cpy
+
+            case Opcodes.tsb:
+                self = .tsb
+            case Opcodes.trb:
+                self = .trb
 
             case Opcodes.noop:
                 self = .nop

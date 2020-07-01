@@ -269,6 +269,18 @@ extension Microprocessor {
             try compare(registers.X, addressingMode: instruction.addressingMode)
         case .cpy:
             try compare(registers.Y, addressingMode: instruction.addressingMode)
+
+        case .trb:
+            let result = UInt16(~registers.A & (try instruction.addressingMode.value(from: memory, registers: registers)))
+            registers.updateZero(for: result)
+
+            try save(result, addressingMode: instruction.addressingMode)
+
+        case .tsb:
+            let result = UInt16(registers.A | (try instruction.addressingMode.value(from: memory, registers: registers)))
+            registers.updateZero(for: result)
+
+            try save(result, addressingMode: instruction.addressingMode)
             
         case .nop:
             // already updated PC, so nothing to do

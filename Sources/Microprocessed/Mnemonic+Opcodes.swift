@@ -66,6 +66,10 @@ extension Instruction.Mnemonic {
         static let cpx: [UInt8] = [0xE0, 0xE4, 0xEC]
         static let cpy: [UInt8] = [0xC0, 0xC4, 0xCC]
 
+        // MARK: - Test and Reset Bits
+        static let trb: [UInt8] = [0x14, 0x1C]
+        static let tsb: [UInt8] = [0x04, 0x0C]
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }
