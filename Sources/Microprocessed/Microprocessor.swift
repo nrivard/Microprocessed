@@ -261,7 +261,7 @@ extension Microprocessor {
             let mask: StatusFlags = [.isNegative, .didOverflow]
 
             // clear bits
-            registers.SR &= ~(mask.rawValue)
+            registers.SR &= ~mask.rawValue
 
             // then copy bits from memory location to SR
             registers.SR |= UInt8(value) & mask.rawValue
@@ -286,12 +286,19 @@ extension Microprocessor {
             try save(result, addressingMode: instruction.addressingMode)
 
         case .rmb:
+            // opcodes are 0xN7 where N is the bit index that is being reset. so take that half the byte to form the mask
+            //
+            // ex: 0x47 resets bit 4
             let mask: UInt8 = ~(1 << (instruction.opcode >> 4))
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) & mask)
 
             try save(result, addressingMode: instruction.addressingMode)
             
         case .smb:
+            // opcodes are 0x(N+8)7 where N is the bit index that is being set (which is why 8 is subtracted.) so take that half of the byte
+            // to form the mask
+            //
+            // ex: 0xA7 resets bit 2
             let mask: UInt8 = 1 << ((instruction.opcode >> 4) - 0x08)
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) | mask)
 
@@ -306,6 +313,9 @@ extension Microprocessor {
             // also just how this damn proc works
             let value = ~(try instruction.addressingMode.value(from: memory, registers: registers))
             arithmeticAdd(value)
+
+        case .jmp:
+            registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
             
         case .nop:
             // already updated PC, so nothing to do

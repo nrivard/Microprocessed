@@ -77,6 +77,9 @@ extension Instruction {
         case adc
         case sbc
 
+        // MARK: - Jumps and Returns
+        case jmp
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -178,6 +181,9 @@ extension Instruction {
                 self = .adc
             case Opcodes.sbc:
                 self = .sbc
+
+            case Opcodes.jmp:
+                self = .jmp
 
             case Opcodes.noop:
                 self = .nop

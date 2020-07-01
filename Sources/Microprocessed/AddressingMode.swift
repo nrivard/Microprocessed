@@ -165,8 +165,8 @@ extension Instruction.AddressingMode {
             return try memory.readWord(fromAddressStartingAt: addr)
 
         case .absoluteIndexedIndirect(let addr, let offset):
-            let resolvedAddr = try memory.readWord(fromAddressStartingAt: addr + UInt16(offset))
-            return try memory.readWord(fromAddressStartingAt: resolvedAddr)
+            return try memory.readWord(fromAddressStartingAt: addr + UInt16(offset))
+//            return try memory.readWord(fromAddressStartingAt: resolvedAddr)
 
         case .immediate, .implied, .accumulator, .stack:
             throw Error.noResolvedAddress

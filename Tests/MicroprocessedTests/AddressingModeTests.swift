@@ -198,7 +198,6 @@ final class AddressingModeTests: SystemTests {
         for (index, opcode) in Opcodes.absoluteIndexedIndirect.enumerated() {
             // there's only one opcode so let's inject a value for index here
             let synthesizedIndex = UInt8(index + 2)
-            try ram.write(toAddressStartingAt: resolvedBase, word: UInt16(opcode &+ 1))
             try ram.write(toAddressStartingAt: indirectBase + UInt16(synthesizedIndex), word: resolvedBase)
 
             try ram.write(to: mpu.registers.PC, data: opcode)
@@ -207,7 +206,7 @@ final class AddressingModeTests: SystemTests {
 
             let addressingMode = try mpu.fetch().addressingMode
             XCTAssert(addressingMode ~= .absoluteIndexedIndirect(address: indirectBase, offset: synthesizedIndex))
-            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == UInt16(opcode &+ 1))
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == resolvedBase)
 
             // doesn't support value mode
             XCTAssertThrowsError(try addressingMode.value(from: ram, registers: mpu.registers))
