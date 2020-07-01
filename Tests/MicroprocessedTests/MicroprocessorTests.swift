@@ -24,6 +24,48 @@ final class MicroprocessorTests: SystemTests {
         try mpu.testLoadImmediateStatusFlags(for: 0xA2)
         try mpu.testLoadImmediateStatusFlags(for: 0xA0)
     }
+
+    func testInterrupt() throws {
+        let returnAddress = mpu.registers.PC
+        let irqAddress: UInt16 = 0xA5DF
+        let status: StatusFlags = [.isNegative, .didCarry, .didOverflow, .alwaysSet]
+        try ram.write(toAddressStartingAt: Microprocessor.irqVector, word: irqAddress)
+        mpu.registers.SR = status.rawValue
+
+        try mpu.interrupt()
+        XCTAssert(mpu.registers.PC == irqAddress)
+        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(try mpu.pop() == status.rawValue)
+        XCTAssert(try mpu.popWord() == returnAddress)
+
+        // we artifically popped the stack but interrupts should still be disabled
+        try mpu.interrupt()
+        XCTAssert(mpu.registers.PC == irqAddress)
+        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+    }
+
+    func testNonmaskableInterrupt() throws {
+        let returnAddress = mpu.registers.PC
+        let irqAddress: UInt16 = 0xA5DF
+        let status: StatusFlags = [.isNegative, .didCarry, .didOverflow, .alwaysSet]
+        try ram.write(toAddressStartingAt: Microprocessor.nmiVector, word: irqAddress)
+        mpu.registers.SR = status.rawValue
+
+        try mpu.nonMaskableInterrupt()
+        XCTAssert(mpu.registers.PC == irqAddress)
+        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(try mpu.pop() == status.rawValue)
+        XCTAssert(try mpu.popWord() == returnAddress)
+
+        // lets test nested NMI interrupts :)
+        // this shouldn't really happen in practice, since my ROM isn't writeable but hey, it's supported in theory
+        let anotherIRQAddress: UInt16 = 0x5005
+        try ram.write(toAddressStartingAt: Microprocessor.nmiVector, word: anotherIRQAddress)
+
+        try mpu.nonMaskableInterrupt()
+        XCTAssert(mpu.registers.PC == anotherIRQAddress)
+        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+    }
 }
 
 extension Microprocessor {

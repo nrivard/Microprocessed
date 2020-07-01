@@ -49,6 +49,34 @@ public class Microprocessor {
 
 extension Microprocessor {
 
+    /// send an interrupt signal. This may be ignored if `interruptsDisabled` is enabled
+    /// TODO: create a software originated variant of this for BRK
+    public func interrupt() throws {
+        guard !registers.statusFlags.contains(.interruptsDisabled) else {
+            return
+        }
+
+        try interrupt(toVector: Microprocessor.irqVector)
+    }
+
+    /// send a non-maskable interrupt signal. This will always execute, even when `interruptsDisabled` is enabled
+    public func nonMaskableInterrupt() throws {
+        try interrupt(toVector: Microprocessor.nmiVector)
+    }
+
+    private func interrupt(toVector vector: UInt16) throws {
+        try pushWord(registers.PC)
+        try push(registers.SR)
+
+        // while in an interrupt routine, interrupts are disabled. this will get cleared (if it was previously cleared) when SR is restored
+        registers.setInterruptsDisabled()
+
+        registers.PC = try memory.readWord(fromAddressStartingAt: vector)
+    }
+}
+
+extension Microprocessor {
+
     /// fetch an instruction and increment the PC
     func fetch() throws -> Instruction {
         let instruction = try Instruction(memory: memory, registers: registers)

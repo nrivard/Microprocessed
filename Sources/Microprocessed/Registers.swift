@@ -106,6 +106,14 @@ extension Registers {
     mutating func clearIsNegative() {
         SR &= ~StatusFlags.isNegative.rawValue
     }
+
+    mutating func setInterruptsDisabled() {
+        SR |= StatusFlags.interruptsDisabled.rawValue
+    }
+
+    mutating func clearInterruptsDisabled() {
+        SR &= ~StatusFlags.interruptsDisabled.rawValue
+    }
 }
 
 extension Registers {
