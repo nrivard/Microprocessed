@@ -293,6 +293,16 @@ extension Microprocessor {
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) | mask)
 
             try save(result, addressingMode: instruction.addressingMode)
+
+        case .adc:
+            let value = try instruction.addressingMode.value(from: memory, registers: registers)
+            arithmeticAdd(value)
+
+        case .sbc:
+            // this performs a 2s complement addition (if `carry` is set) since we can handle overflow but not underflow.
+            // also just how this damn proc works
+            let value = ~(try instruction.addressingMode.value(from: memory, registers: registers))
+            arithmeticAdd(value)
             
         case .nop:
             // already updated PC, so nothing to do
@@ -336,6 +346,17 @@ extension Microprocessor {
         } else {
             registers.clearCarry()
         }
+    }
+
+    private func arithmeticAdd(_ value: UInt8) {
+        let result = [registers.A, value, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+
+        registers.updateSign(for: result)
+        registers.updateZero(for: result)
+        registers.updateCarry(for: result)
+        registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
+
+        registers.A = result.truncated
     }
 }
 

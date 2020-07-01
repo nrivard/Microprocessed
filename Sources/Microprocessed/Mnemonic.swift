@@ -73,6 +73,10 @@ extension Instruction {
         case rmb
         case smb
 
+        // MARK: - Arithmetic
+        case adc
+        case sbc
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -169,6 +173,11 @@ extension Instruction {
                 self = .smb
             case Opcodes.rmb:
                 self = .rmb
+
+            case Opcodes.adc:
+                self = .adc
+            case Opcodes.sbc:
+                self = .sbc
 
             case Opcodes.noop:
                 self = .nop

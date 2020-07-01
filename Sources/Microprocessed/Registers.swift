@@ -107,3 +107,10 @@ extension Registers {
         SR &= ~StatusFlags.isNegative.rawValue
     }
 }
+
+extension Registers {
+
+    var arithmeticCarry: UInt8 {
+        return (SR & StatusFlags.didCarry.rawValue) > 0 ? 1 : 0
+    }
+}
