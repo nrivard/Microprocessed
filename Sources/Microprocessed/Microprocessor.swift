@@ -257,11 +257,14 @@ extension Microprocessor {
             let result = UInt16(registers.A) & value
             registers.updateZero(for: result)
 
-            // clear bits 6 and 7
-            registers.SR &= 0x3F
+            // mask for bits 6 and 7
+            let mask: StatusFlags = [.isNegative, .didOverflow]
 
-            // then copy bits 6 and 7 from memory location to SR
-            registers.SR |= UInt8(value & 0b1100_0000)
+            // clear bits
+            registers.SR &= ~(mask.rawValue)
+
+            // then copy bits from memory location to SR
+            registers.SR |= UInt8(value) & mask.rawValue
 
         case .cmp:
             try compare(registers.A, addressingMode: instruction.addressingMode)
