@@ -262,6 +262,13 @@ extension Microprocessor {
 
             // then copy bits 6 and 7 from memory location to SR
             registers.SR |= UInt8(value & 0b1100_0000)
+
+        case .cmp:
+            try compare(registers.A, addressingMode: instruction.addressingMode)
+        case .cpx:
+            try compare(registers.X, addressingMode: instruction.addressingMode)
+        case .cpy:
+            try compare(registers.Y, addressingMode: instruction.addressingMode)
             
         case .nop:
             // already updated PC, so nothing to do
@@ -288,6 +295,23 @@ extension Microprocessor {
 
         let addr = try addressingMode.address(from: memory, registers: registers)
         try memory.write(to: addr, data: truncatedValue)
+    }
+}
+
+extension Microprocessor {
+
+    private func compare(_ register: UInt8, addressingMode: Instruction.AddressingMode) throws {
+        let value = UInt16(try addressingMode.value(from: memory, registers: registers))
+
+        let result = UInt16(register) &- value
+        registers.updateSign(for: result)
+        registers.updateZero(for: result)
+
+        if register >= value {
+            registers.setCarry()
+        } else {
+            registers.clearCarry()
+        }
     }
 }
 

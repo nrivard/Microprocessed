@@ -41,17 +41,17 @@ extension Registers {
 
     mutating func updateZero(for result: UInt16) {
         if result & 0x00FF > 0 {
-            SR &= ~StatusFlags.isZero.rawValue
+            clearZero()
         } else {
-            SR |= StatusFlags.isZero.rawValue
+            setZero()
         }
     }
 
     mutating func updateSign(for result: UInt16) {
         if result & 0x80 > 0 {
-            SR |= StatusFlags.isNegative.rawValue
+            setIsNegative()
         } else {
-            SR &= ~StatusFlags.isNegative.rawValue
+            clearIsNegative()
         }
     }
 
@@ -66,9 +66,9 @@ extension Registers {
     /// lifted from Mike Chamber's MoarNES and mathematically validated via http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
     mutating func updateOverflow(for result: UInt16, leftOperand: UInt8, rightOperand: UInt8) {
         if (result ^ UInt16(leftOperand)) & (result ^ UInt16(rightOperand)) & 0x0080 > 0 {
-            SR |= StatusFlags.didOverflow.rawValue
+            setOverflow()
         } else {
-            SR &= ~StatusFlags.didOverflow.rawValue
+            clearOverflow()
         }
     }
 }
@@ -81,5 +81,29 @@ extension Registers {
 
     mutating func clearCarry() {
         SR &= ~StatusFlags.didCarry.rawValue
+    }
+
+    mutating func setZero() {
+        SR |= StatusFlags.isZero.rawValue
+    }
+
+    mutating func clearZero() {
+        SR &= ~StatusFlags.isZero.rawValue
+    }
+
+    mutating func setOverflow() {
+        SR |= StatusFlags.didOverflow.rawValue
+    }
+
+    mutating func clearOverflow() {
+        SR &= ~StatusFlags.didOverflow.rawValue
+    }
+
+    mutating func setIsNegative() {
+        SR |= StatusFlags.isNegative.rawValue
+    }
+
+    mutating func clearIsNegative() {
+        SR &= ~StatusFlags.isNegative.rawValue
     }
 }

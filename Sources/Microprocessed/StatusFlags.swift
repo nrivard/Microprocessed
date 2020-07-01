@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// semantic representation of the StatusFlags that can be easily queried
 public struct StatusFlags: OptionSet {
     public let rawValue: UInt8
 

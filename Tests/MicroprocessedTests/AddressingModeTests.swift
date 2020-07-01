@@ -277,6 +277,17 @@ final class AddressingModeTests: SystemTests {
         for (index, opcode) in Opcodes.zeroPageIndexedY.enumerated() {
             try testZeroPagedIndexedOpcode(opcode, atIndex: UInt8(index), registerIsX: false)
         }
+
+        // test wraparound
+        mpu.registers.X = 0x81
+        try ram.write(to: UInt16(zeroPageBase &+ mpu.registers.X), data: 0xAA)
+        try ram.write(to: mpu.registers.PC, data: Opcodes.zeroPageIndexedX[0])
+        try ram.write(to: mpu.registers.PC + 1, data: zeroPageBase)
+
+        let addressingMode = try mpu.fetch().addressingMode
+        XCTAssert(addressingMode ~= .zeroPageIndexed(address: zeroPageBase, offset: 0x81))
+        XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == 0xAA)
+        XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == 0x01)
     }
 
     func testZeroPageIndirect() throws {

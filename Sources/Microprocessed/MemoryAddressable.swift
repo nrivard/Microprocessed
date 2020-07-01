@@ -24,6 +24,8 @@ extension MemoryAddressable {
 
     /// reads a 16 bit value with low order byte at `lowByteAddress` and then a high order
     /// byte at `lowByteAddress + 1`
+    ///
+    /// TODO: this does not respect zero-page addressing wrapping so should be used with caution.
     public func readWord(fromAddressStartingAt lowByteAddress: UInt16) throws -> UInt16 {
         let highByteAddress = lowByteAddress + 1
 
@@ -33,6 +35,8 @@ extension MemoryAddressable {
 
     /// writes a 16 bit value with low order byte at `lowByteAddress` and then a high order
     /// byte at `lowByteAddress + 1`
+    ///
+    /// TODO: this does not respect zero-page addressing wrapping so should be used with caution.
     public func write(toAddressStartingAt lowByteAddress: UInt16, word: UInt16) throws {
         let highByteAddress = lowByteAddress + 1
 

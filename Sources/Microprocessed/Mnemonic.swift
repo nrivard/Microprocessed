@@ -62,6 +62,11 @@ extension Instruction {
         case eor
         case bit
 
+        // MARK: - Comparison
+        case cmp
+        case cpx
+        case cpy
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -142,6 +147,13 @@ extension Instruction {
                 self = .eor
             case Opcodes.bit:
                 self = .bit
+
+            case Opcodes.cmp:
+                self = .cmp
+            case Opcodes.cpx:
+                self = .cpx
+            case Opcodes.cpy:
+                self = .cpy
 
             case Opcodes.noop:
                 self = .nop

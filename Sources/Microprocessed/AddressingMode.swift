@@ -137,13 +137,17 @@ extension Instruction.AddressingMode {
             return UInt16(addr)
 
         case .zeroPageIndexed(let addr, let offset):
-            return UInt16(addr + offset)
+            // supports wraparound addressing
+            return UInt16(UInt8(addr &+ offset))
 
         case .zeroPageIndirect(let addr):
             return try memory.readWord(fromAddressStartingAt:  UInt16(addr))
 
         case .zeroPageIndexedIndirect(let addr, let offset):
-            return try memory.readWord(fromAddressStartingAt: UInt16(addr + offset))
+            // supports wraparound addressing in zero page
+            //
+            // TODO: if first byte is stored at `0xFF`, where should second byte live: 0x100 or 0x000?
+            return try memory.readWord(fromAddressStartingAt: UInt16(UInt8(addr &+ offset)))
 
         case .zeroPageIndirectIndexed(let addr, let offset):
             return try memory.readWord(fromAddressStartingAt: UInt16(addr)) + UInt16(offset)
