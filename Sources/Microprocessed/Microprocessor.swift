@@ -383,6 +383,13 @@ extension Microprocessor {
 
         case .bra:
             registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
+
+        case .beq:
+            guard registers.statusFlags.contains(.isZero) else {
+                break
+            }
+
+            registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
             
         case .nop:
             // already updated PC, so nothing to do

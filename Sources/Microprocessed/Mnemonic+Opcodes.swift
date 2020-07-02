@@ -84,6 +84,7 @@ extension Instruction.Mnemonic {
 
         // MARK: - Branches
         static let bra: [UInt8] = [0x80]
+        static let beq: [UInt8] = [0xF0]
 
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]

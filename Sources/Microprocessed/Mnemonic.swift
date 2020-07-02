@@ -85,6 +85,7 @@ extension Instruction {
 
         // MARK: - Branches
         case bra
+        case beq
 
         // MARK: - Miscellaneous
         case nop
@@ -199,6 +200,8 @@ extension Instruction {
 
             case Opcodes.bra:
                 self = .bra
+            case Opcodes.beq:
+                self = .beq
 
             case Opcodes.noop:
                 self = .nop
