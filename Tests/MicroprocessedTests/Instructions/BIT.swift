@@ -24,7 +24,9 @@ final class BITTests: SystemTests {
 
         for (memory, result) in BITTests.results {
             try mpu.execute(opcode, data: memory)
-            XCTAssert(mpu.registers.SR == result, "Expected \(result), got \(mpu.registers.SR)")
+            
+            // immediate mode does NOT affect NV. so mask those bits out
+            XCTAssert(mpu.registers.SR == result & 0x3F, "Expected \(result), got \(mpu.registers.SR)")
             XCTAssert(mpu.registers.A == 0xFF) // A is unchanged
         }
     }

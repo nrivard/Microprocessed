@@ -83,6 +83,9 @@ extension Instruction {
         case rts
         case rti
 
+        // MARK: - Branches
+        case bra
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -193,6 +196,9 @@ extension Instruction {
                 self = .rts
             case Opcodes.rti:
                 self = .rti
+
+            case Opcodes.bra:
+                self = .bra
 
             case Opcodes.noop:
                 self = .nop

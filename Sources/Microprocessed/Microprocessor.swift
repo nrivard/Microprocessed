@@ -77,6 +77,21 @@ extension Microprocessor {
 
 extension Microprocessor {
 
+    /// writes an opcode and 1-byte of data at the address pointed to by PC
+    public func writeOpcode(_ opcode: UInt8, data: UInt8) throws {
+        try memory.write(to: registers.PC, data: opcode)
+        try memory.write(to: registers.PC + 1, data: data)
+    }
+
+    /// writes an opcode and 2-bytes of data at the address pointed to by PC
+    public func writeOpcode(_ opcode: UInt8, word: UInt16) throws {
+        try memory.write(to: registers.PC, data: opcode)
+        try memory.write(toAddressStartingAt: registers.PC + 1, word: word)
+    }
+}
+
+extension Microprocessor {
+
     /// fetch an instruction and increment the PC
     func fetch() throws -> Instruction {
         let instruction = try Instruction(memory: memory, registers: registers)
@@ -285,6 +300,12 @@ extension Microprocessor {
             let result = UInt16(registers.A) & value
             registers.updateZero(for: result)
 
+            // weird trivia: BIT is the only 65C02 instruction where status flags are affected differently depending on
+            // addressing mode. In this case, N and V are not affected in the newer immediate addressing mode, so just `break`
+            if case .immediate = instruction.addressingMode {
+                break
+            }
+
             // mask for bits 6 and 7
             let mask: StatusFlags = [.isNegative, .didOverflow]
 
@@ -359,6 +380,9 @@ extension Microprocessor {
             // restore status register first
             registers.SR = try pop()
             registers.PC = try popWord()
+
+        case .bra:
+            registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
             
         case .nop:
             // already updated PC, so nothing to do

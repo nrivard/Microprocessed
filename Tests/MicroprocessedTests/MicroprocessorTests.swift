@@ -78,15 +78,13 @@ extension Microprocessor {
 
     /// convenience that writes an opcode and data, then executes it
     func execute(_ opcode: UInt8, data: UInt8) throws {
-        try memory.write(to: registers.PC, data: opcode)
-        try memory.write(to: registers.PC + 1, data: data)
+        try writeOpcode(opcode, data: data)
         try tick()
     }
 
     /// convenience that writes an opcode and word, then executes it
     func execute(_ opcode: UInt8, word: UInt16) throws {
-        try memory.write(to: registers.PC, data: opcode)
-        try memory.write(toAddressStartingAt: registers.PC + 1, word: word)
+        try writeOpcode(opcode, word: word)
         try tick()
     }
 

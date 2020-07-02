@@ -82,6 +82,9 @@ extension Instruction.Mnemonic {
         static let rts: [UInt8] = [0x60]
         static let rti: [UInt8] = [0x40]
 
+        // MARK: - Branches
+        static let bra: [UInt8] = [0x80]
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }

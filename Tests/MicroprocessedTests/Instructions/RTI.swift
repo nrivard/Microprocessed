@@ -1,7 +1,6 @@
 import XCTest
 @testable import Microprocessed
 
-
 final class RTITests: SystemTests {
 
     func testRTI() throws {
