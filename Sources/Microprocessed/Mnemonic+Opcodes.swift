@@ -104,6 +104,12 @@ extension Instruction.Mnemonic {
         static let sed: [UInt8] = [0xF8]
         static let sei: [UInt8] = [0x78]
 
+        // MARK: - Transfers
+        static let tax: [UInt8] = [0xAA]
+        static let tay: [UInt8] = [0xA8]
+        static let txa: [UInt8] = [0x8A]
+        static let tya: [UInt8] = [0x98]
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }

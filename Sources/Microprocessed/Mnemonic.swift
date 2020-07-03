@@ -105,6 +105,12 @@ extension Instruction {
         case sed
         case sei
 
+        // MARK: - Transfers
+        case tax
+        case tay
+        case txa
+        case tya
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -253,6 +259,15 @@ extension Instruction {
                 self = .sed
             case Opcodes.sei:
                 self = .sei
+
+            case Opcodes.tax:
+                self = .tax
+            case Opcodes.tay:
+                self = .tay
+            case Opcodes.txa:
+                self = .txa
+            case Opcodes.tya:
+                self = .tya
 
             case Opcodes.noop:
                 self = .nop

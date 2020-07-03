@@ -106,8 +106,7 @@ extension Microprocessor {
 
         case .lda, .ldx, .ldy:
             let result = try instruction.addressingMode.value(from: memory, registers: registers)
-            registers.updateZero(for: UInt16(result))
-            registers.updateSign(for: UInt16(result))
+            updateSignZero(for: result)
 
             if case .lda = instruction.mnemonic {
                 registers.A = result
@@ -155,8 +154,7 @@ extension Microprocessor {
 
         case .pla, .plx, .ply, .plp:
             let result = try pop()
-            registers.updateZero(for: UInt16(result))
-            registers.updateSign(for: UInt16(result))
+            updateSignZero(for: result)
 
             if case .pla = instruction.mnemonic {
                 registers.A = result
@@ -176,8 +174,7 @@ extension Microprocessor {
 
         case .tsx:
             registers.X = registers.SP
-            registers.updateZero(for: UInt16(registers.X))
-            registers.updateSign(for: UInt16(registers.X))
+            updateSignZero(for: registers.X)
 
         case .ina, .inx, .iny, .inc:
             let result: UInt8
@@ -199,8 +196,7 @@ extension Microprocessor {
                 throw Error.undefinedInstruction
             }
 
-            registers.updateZero(for: UInt16(result))
-            registers.updateSign(for: UInt16(result))
+            updateSignZero(for: result)
 
         case .dea, .dex, .dey, .dec:
             let result: UInt8
@@ -222,14 +218,12 @@ extension Microprocessor {
                 throw Error.undefinedInstruction
             }
 
-            registers.updateZero(for: UInt16(result))
-            registers.updateSign(for: UInt16(result))
+            updateSignZero(for: result)
 
         case .asl:
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers)) << 1
 
-            registers.updateZero(for: result)
-            registers.updateSign(for: result)
+            updateSignZero(for: result)
             registers.updateCarry(for: result)
 
             try save(result, addressingMode: instruction.addressingMode)
@@ -238,8 +232,7 @@ extension Microprocessor {
             let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
             let result = value >> 1
 
-            registers.updateZero(for: result)
-            registers.updateSign(for: result)
+            updateSignZero(for: result)
 
             if value & 0x1 > 0 {
                 registers.setCarry()
@@ -253,8 +246,7 @@ extension Microprocessor {
             let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
             let result = (value << 1) | (registers.statusFlags.contains(.didCarry) ? 1 : 0)
 
-            registers.updateZero(for: result)
-            registers.updateSign(for: result)
+            updateSignZero(for: result)
             registers.updateCarry(for: result)
 
             try save(result, addressingMode: instruction.addressingMode)
@@ -263,8 +255,7 @@ extension Microprocessor {
             let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
             let result = (value >> 1) | UInt16(registers.statusFlags.contains(.didCarry) ? (1 << 7) : 0)
 
-            registers.updateZero(for: result)
-            registers.updateSign(for: result)
+            updateSignZero(for: result)
 
             if value & 0x1 > 0 {
                 registers.setCarry()
@@ -276,22 +267,19 @@ extension Microprocessor {
 
         case .and:
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) & registers.A)
-            registers.updateZero(for: result)
-            registers.updateSign(for: result)
+            updateSignZero(for: result)
 
             registers.A = result.truncated
 
         case .ora:
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) | registers.A)
-            registers.updateZero(for: result)
-            registers.updateSign(for: result)
+            updateSignZero(for: result)
 
             registers.A = result.truncated
 
         case .eor:
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) ^ registers.A)
-            registers.updateZero(for: result)
-            registers.updateSign(for: result)
+            updateSignZero(for: result)
 
             registers.A = result.truncated
 
@@ -418,6 +406,19 @@ extension Microprocessor {
             registers.setDecimal()
         case .sei:
             registers.setInterruptsDisabled()
+
+        case .tax:
+            registers.X = registers.A
+            updateSignZero(for: registers.X)
+        case .tay:
+            registers.Y = registers.A
+            updateSignZero(for: registers.Y)
+        case .txa:
+            registers.A = registers.X
+            updateSignZero(for: registers.A)
+        case .tya:
+            registers.A = registers.Y
+            updateSignZero(for: registers.A)
             
         case .nop:
             // already updated PC, so nothing to do
@@ -480,6 +481,15 @@ extension Microprocessor {
         }
 
         registers.PC = try addressingMode.address(from: memory, registers: registers)
+    }
+
+    private func updateSignZero(for result: UInt8) {
+        updateSignZero(for: UInt16(result))
+    }
+
+    private func updateSignZero(for result: UInt16) {
+        registers.updateSign(for: result)
+        registers.updateZero(for: result)
     }
 }
 

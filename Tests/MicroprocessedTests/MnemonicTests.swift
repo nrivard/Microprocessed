@@ -71,6 +71,10 @@ final class MnemonicTests: XCTestCase {
             Mnemonic.Opcodes.sec,
             Mnemonic.Opcodes.sed,
             Mnemonic.Opcodes.sei,
+            Mnemonic.Opcodes.tax,
+            Mnemonic.Opcodes.tay,
+            Mnemonic.Opcodes.txa,
+            Mnemonic.Opcodes.tya,
             Mnemonic.Opcodes.noop,
         ].flatMap { $0 }
 
