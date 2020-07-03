@@ -21,6 +21,8 @@ public struct StatusFlags: OptionSet {
     public static let alwaysSet: StatusFlags = .init(rawValue: 1 << 5)
 
     /// interrupt requested is a `BRK` when set. It is `IRQ` or `NMI` when not set
+    ///
+    /// NOTE: this should always be set. this is only ever a 0 on the _stack_, never in the SR register
     public static let isSoftwareInterrupt: StatusFlags = .init(rawValue: 1 << 4)
 
     /// MPU is currently in decimal arithmetic mode

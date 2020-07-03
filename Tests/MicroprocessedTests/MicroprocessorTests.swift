@@ -28,14 +28,14 @@ final class MicroprocessorTests: SystemTests {
     func testInterrupt() throws {
         let returnAddress = mpu.registers.PC
         let irqAddress: UInt16 = 0xA5DF
-        let status: StatusFlags = [.isNegative, .didCarry, .didOverflow, .alwaysSet]
+        let status: StatusFlags = [.isNegative, .didCarry, .didOverflow, .alwaysSet, .isSoftwareInterrupt]
         try ram.write(toAddressStartingAt: Microprocessor.irqVector, word: irqAddress)
         mpu.registers.SR = status.rawValue
 
         try mpu.interrupt()
         XCTAssert(mpu.registers.PC == irqAddress)
         XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
-        XCTAssert(try mpu.pop() == status.rawValue)
+        XCTAssert(try mpu.pop() == status.subtracting(.isSoftwareInterrupt).rawValue)
         XCTAssert(try mpu.popWord() == returnAddress)
 
         // we artifically popped the stack but interrupts should still be disabled
@@ -47,14 +47,14 @@ final class MicroprocessorTests: SystemTests {
     func testNonmaskableInterrupt() throws {
         let returnAddress = mpu.registers.PC
         let irqAddress: UInt16 = 0xA5DF
-        let status: StatusFlags = [.isNegative, .didCarry, .didOverflow, .alwaysSet]
+        let status: StatusFlags = [.isNegative, .didCarry, .didOverflow, .alwaysSet, .isSoftwareInterrupt]
         try ram.write(toAddressStartingAt: Microprocessor.nmiVector, word: irqAddress)
         mpu.registers.SR = status.rawValue
 
         try mpu.nonMaskableInterrupt()
         XCTAssert(mpu.registers.PC == irqAddress)
         XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
-        XCTAssert(try mpu.pop() == status.rawValue)
+        XCTAssert(try mpu.pop() == status.subtracting(.isSoftwareInterrupt).rawValue)
         XCTAssert(try mpu.popWord() == returnAddress)
 
         // lets test nested NMI interrupts :)

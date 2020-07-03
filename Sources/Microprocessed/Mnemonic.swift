@@ -113,6 +113,8 @@ extension Instruction {
 
         // MARK: - Miscellaneous
         case nop
+        case brk
+
         case undefined
 
         init(_ opcode: UInt8) {
@@ -271,6 +273,8 @@ extension Instruction {
 
             case Opcodes.noop:
                 self = .nop
+            case Opcodes.brk:
+                self = .brk
 
             default:
                 self = .undefined

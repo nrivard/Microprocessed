@@ -112,5 +112,6 @@ extension Instruction.Mnemonic {
 
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
+        static let brk: [UInt8] = [0x00]
     }
 }

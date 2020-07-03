@@ -56,17 +56,19 @@ extension Microprocessor {
             return
         }
 
-        try interrupt(toVector: Microprocessor.irqVector)
+        try interrupt(toVector: Microprocessor.irqVector, isHardware: true)
     }
 
     /// send a non-maskable interrupt signal. This will always execute, even when `interruptsDisabled` is enabled
     public func nonMaskableInterrupt() throws {
-        try interrupt(toVector: Microprocessor.nmiVector)
+        try interrupt(toVector: Microprocessor.nmiVector, isHardware: true)
     }
 
-    private func interrupt(toVector vector: UInt16) throws {
+    private func interrupt(toVector vector: UInt16, isHardware: Bool) throws {
         try pushWord(registers.PC)
-        try push(registers.SR)
+
+        let mask: UInt8 = isHardware ? ~StatusFlags.isSoftwareInterrupt.rawValue : 0xFF
+        try push(registers.SR & mask)
 
         // while in an interrupt routine, interrupts are disabled. this will get cleared (if it was previously cleared) when SR is restored
         registers.setInterruptsDisabled()
@@ -145,6 +147,7 @@ extension Microprocessor {
             } else if case .phy = instruction.mnemonic {
                 registerValue = registers.Y
             } else if case .php = instruction.mnemonic {
+                // shouldn't need to push this explicitly to the stack. it is always set
                 registerValue = registers.SR
             } else {
                 throw Error.undefinedInstruction
@@ -358,8 +361,8 @@ extension Microprocessor {
             registers.PC = try popWord() + 1
 
         case .rti:
-            // restore status register first
-            registers.SR = try pop()
+            // restore status register first. make sure to set `isSoftwareInterrupt` as this is always a `1` in the actual register
+            registers.SR = try pop() | StatusFlags.isSoftwareInterrupt.rawValue
             registers.PC = try popWord()
 
         case .bra:
@@ -423,6 +426,8 @@ extension Microprocessor {
         case .nop:
             // already updated PC, so nothing to do
             break
+        case .brk:
+            try interrupt(toVector: Microprocessor.irqVector, isHardware: false)
 
         case .undefined:
             throw Error.undefinedInstruction

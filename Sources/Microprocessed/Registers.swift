@@ -23,7 +23,7 @@ public struct Registers: Equatable, Hashable {
     public var SP: UInt8 = 0
     
     /// Status register
-    public var SR: UInt8 = 0
+    public var SR: UInt8 = StatusFlags(arrayLiteral: [.isSoftwareInterrupt, .alwaysSet]).rawValue
     
     /// Program counter
     public var PC: UInt16 = 0
@@ -121,6 +121,10 @@ extension Registers {
 
     mutating func clearDecimal() {
         SR &= ~StatusFlags.decimalMode.rawValue
+    }
+
+    mutating func clearSoftwareInterrupt() {
+        SR &= ~StatusFlags.isSoftwareInterrupt.rawValue
     }
 }
 
