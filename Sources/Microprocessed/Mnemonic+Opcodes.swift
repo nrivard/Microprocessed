@@ -85,6 +85,15 @@ extension Instruction.Mnemonic {
         // MARK: - Branches
         static let bra: [UInt8] = [0x80]
         static let beq: [UInt8] = [0xF0]
+        static let bne: [UInt8] = [0xD0]
+        static let bcc: [UInt8] = [0x90]
+        static let bcs: [UInt8] = [0xB0]
+        static let bvc: [UInt8] = [0x50]
+        static let bvs: [UInt8] = [0x70]
+        static let bmi: [UInt8] = [0x30]
+        static let bpl: [UInt8] = [0x10]
+        static let bbr: [UInt8] = [0x0F, 0x1F, 0x2F, 0x3F, 0x4F, 0x5F, 0x6F, 0x7F]
+        static let bbs: [UInt8] = [0x8F, 0x9F, 0xAF, 0xBF, 0xCF, 0xDF, 0xEF, 0xFF]
 
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]

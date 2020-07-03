@@ -335,20 +335,13 @@ extension Microprocessor {
             try save(result, addressingMode: instruction.addressingMode)
 
         case .rmb:
-            // opcodes are 0xN7 where N is the bit index that is being reset. so take that half the byte to form the mask
-            //
-            // ex: 0x47 resets bit 4
-            let mask: UInt8 = ~(1 << (instruction.opcode >> 4))
+            let mask = instruction.resetOpcodeBitMask
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) & mask)
 
             try save(result, addressingMode: instruction.addressingMode)
             
         case .smb:
-            // opcodes are 0x(N+8)7 where N is the bit index that is being set (which is why 8 is subtracted.) so take that half of the byte
-            // to form the mask
-            //
-            // ex: 0xA7 resets bit 2
-            let mask: UInt8 = 1 << ((instruction.opcode >> 4) - 0x08)
+            let mask = instruction.setOpcodeBitMask
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) | mask)
 
             try save(result, addressingMode: instruction.addressingMode)
@@ -382,14 +375,44 @@ extension Microprocessor {
             registers.PC = try popWord()
 
         case .bra:
-            registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
+            try branch(on: true, addressingMode: instruction.addressingMode)
 
         case .beq:
-            guard registers.statusFlags.contains(.isZero) else {
-                break
-            }
+            try branch(on: registers.statusFlags.contains(.isZero), addressingMode: instruction.addressingMode)
 
-            registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
+        case .bne:
+            try branch(on: !registers.statusFlags.contains(.isZero), addressingMode: instruction.addressingMode)
+
+        case .bcc:
+            try branch(on: registers.statusFlags.contains(.didCarry), addressingMode: instruction.addressingMode)
+
+        case .bcs:
+            try branch(on: !registers.statusFlags.contains(.didCarry), addressingMode: instruction.addressingMode)
+
+        case .bvs:
+            try branch(on: registers.statusFlags.contains(.didOverflow), addressingMode: instruction.addressingMode)
+            
+        case .bvc:
+            try branch(on: !registers.statusFlags.contains(.didOverflow), addressingMode: instruction.addressingMode)
+
+        case .bmi:
+            try branch(on: registers.statusFlags.contains(.isNegative), addressingMode: instruction.addressingMode)
+
+        case .bpl:
+            try branch(on: !registers.statusFlags.contains(.isNegative), addressingMode: instruction.addressingMode)
+
+        case .bbr:
+            let mask = instruction.resetOpcodeBitMask
+            let zeroPageAddr = try instruction.addressingMode.value(from: memory, registers: registers)
+            let value = try memory.read(from: UInt16(zeroPageAddr))
+
+            try branch(on: value & mask == 0, addressingMode: instruction.addressingMode)
+
+        case .bbs:
+            let mask = instruction.setOpcodeBitMask
+            let value = try instruction.addressingMode.value(from: memory, registers: registers)
+
+            try branch(on: value & mask > 0, addressingMode: instruction.addressingMode)
             
         case .nop:
             // already updated PC, so nothing to do
@@ -444,6 +467,14 @@ extension Microprocessor {
         registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
 
         registers.A = result.truncated
+    }
+
+    private func branch(on condition: @autoclosure () throws -> Bool, addressingMode: Instruction.AddressingMode) throws {
+        guard try condition() else {
+            return
+        }
+
+        registers.PC = try addressingMode.address(from: memory, registers: registers)
     }
 }
 

@@ -25,7 +25,7 @@ public struct Instruction {
             return 1
         case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed:
             return 2
-        case .absolute, .absoluteIndexed, .absoluteIndirect, .absoluteIndexedIndirect:
+        case .absolute, .absoluteIndexed, .absoluteIndirect, .absoluteIndexedIndirect, .zeroPageThenRelative:
             return 3
         }
     }
@@ -46,4 +46,23 @@ public struct Instruction {
 //        self.opcode = opcode
 //        self.addressingMode = addressingMode
 //    }
+}
+
+extension Instruction {
+
+    /// returns a mask with the bit index based on a `reset` (or clear) opcode. This is suitable for use with the RMB• and BBR• instructions
+    /// where the bit index is encoded in the upper half of the opcode
+    ///
+    /// ex: RMB4 has an opcode of 0x47 which resets bit 4
+    var resetOpcodeBitMask: UInt8 {
+        return ~(1 << (opcode >> 4))
+    }
+
+    /// returns a mask with the bit index based on a `set` opcode. This is suitable for use with the SMB• and BBS• instructions
+    /// where the bit index is encoded in the upper half of the opcode
+    ///
+    /// ex: BBS2 has an opcode of 0xAF which resets bit 2
+    var setOpcodeBitMask: UInt8 {
+        return 1 << ((opcode >> 4) - 0x08)
+    }
 }

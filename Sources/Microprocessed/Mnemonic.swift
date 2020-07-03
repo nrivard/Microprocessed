@@ -86,6 +86,15 @@ extension Instruction {
         // MARK: - Branches
         case bra
         case beq
+        case bne
+        case bcc
+        case bcs
+        case bvc
+        case bvs
+        case bmi
+        case bpl
+        case bbr
+        case bbs
 
         // MARK: - Miscellaneous
         case nop
@@ -202,6 +211,24 @@ extension Instruction {
                 self = .bra
             case Opcodes.beq:
                 self = .beq
+            case Opcodes.bne:
+                self = .bne
+            case Opcodes.bcc:
+                self = .bcc
+            case Opcodes.bcs:
+                self = .bcs
+            case Opcodes.bvc:
+                self = .bvc
+            case Opcodes.bvs:
+                self = .bvs
+            case Opcodes.bmi:
+                self = .bmi
+            case Opcodes.bpl:
+                self = .bpl
+            case Opcodes.bbr:
+                self = .bbr
+            case Opcodes.bbs:
+                self = .bbs
 
             case Opcodes.noop:
                 self = .nop

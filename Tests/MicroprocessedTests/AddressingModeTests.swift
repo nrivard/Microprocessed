@@ -26,7 +26,8 @@ final class AddressingModeTests: SystemTests {
             Opcodes.zeroPageIndexedX,
             Opcodes.zeroPageIndexedY,
             Opcodes.zeroPageIndirect,
-            Opcodes.zeroPageIndirectIndexed
+            Opcodes.zeroPageIndirectIndexed,
+            Opcodes.zeroPageThenRelative
         ].flatMap { $0 }
 
         let allOpcodesSet = Set(allOpcodes)
@@ -344,6 +345,28 @@ final class AddressingModeTests: SystemTests {
             XCTAssert(addressingMode ~= .zeroPageIndirectIndexed(address: zeroPageBase, offset: UInt8(index)))
             XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == resolvedBase + UInt16(index))
             XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
+        }
+    }
+
+    func testZeroPageThenRelative() throws {
+        let negativeOffset = Int8(-120)
+        let positiveOffset = Int8(120)
+
+        for (index, opcode) in Opcodes.zeroPageThenRelative.enumerated() {
+            let offset = index % 2 == 0 ? positiveOffset : negativeOffset
+
+            try ram.write(to: UInt16(index), data: opcode &+ 1)
+
+            try ram.write(to: mpu.registers.PC, data: opcode)
+            try ram.write(to: mpu.registers.PC + 1, data: UInt8(index))
+            try ram.write(to: mpu.registers.PC + 2, data: UInt8(bitPattern: offset))
+
+            let addressingMode = try mpu.fetch().addressingMode
+            XCTAssert(addressingMode ~= .zeroPageThenRelative(zeroPage: UInt8(index), relative: offset))
+            XCTAssert(try addressingMode.value(from: ram, registers: mpu.registers) == opcode &+ 1)
+
+            let relativeAddress = UInt16(bitPattern: Int16(offset)) &+ mpu.registers.PC
+            XCTAssert(try addressingMode.address(from: ram, registers: mpu.registers) == relativeAddress)
         }
     }
 }

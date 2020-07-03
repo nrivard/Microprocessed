@@ -31,6 +31,12 @@ extension Instruction {
         case zeroPageIndirectIndexed(address: UInt8, offset: UInt8)
         case relative(offset: Int8)
 
+        /// this one is quite weird. First, it's a zeropage address to do a test (for BBS• and BBR•)
+        /// then, it's a relative address if that test succeeded
+        /// to accomplish this, this instruction will return the memory at the zero page address for `.value(::)`
+        /// then, it will return relative address for `.address(::)`
+        case zeroPageThenRelative(zeroPage: UInt8, relative: Int8)
+
         public init(_ opcode: UInt8, memory: MemoryAddressable, registers: Registers) throws {
             typealias Opcodes = Instruction.AddressingMode.Opcodes
 
@@ -103,6 +109,11 @@ extension Instruction {
                 let offset = try memory.read(from: registers.PC + 1)
                 self = .relative(offset: Int8(bitPattern: offset))
 
+            case Instruction.AddressingMode.Opcodes.zeroPageThenRelative:
+                let zeroPage = try memory.read(from: registers.PC + 1)
+                let relative = try memory.read(from: registers.PC + 2)
+                self = .zeroPageThenRelative(zeroPage: zeroPage, relative: Int8(bitPattern: relative))
+
             default:
                 throw Instruction.AddressingMode.Error.unknown
             }
@@ -123,6 +134,9 @@ extension Instruction.AddressingMode {
 
         case .zeroPage, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed, .absolute, .absoluteIndexed:
             return try memory.read(from: try address(from: memory, registers: registers))
+
+        case .zeroPageThenRelative(let addr, _):
+            return try memory.read(from: UInt16(addr))
 
         case .implied, .stack, .relative, .absoluteIndirect, .absoluteIndexedIndirect:
             throw Error.noAssociatedValue
@@ -152,8 +166,8 @@ extension Instruction.AddressingMode {
         case .zeroPageIndirectIndexed(let addr, let offset):
             return try memory.readWord(fromAddressStartingAt: UInt16(addr)) + UInt16(offset)
 
-        case .relative(let offset):
-            return UInt16(Int32(registers.PC) + Int32(offset))
+        case .relative(let offset), .zeroPageThenRelative(_, let offset):
+            return UInt16(0xFFFF & Int32(registers.PC) + Int32(offset))
 
         case .absolute(let addr):
             return addr
@@ -166,8 +180,7 @@ extension Instruction.AddressingMode {
 
         case .absoluteIndexedIndirect(let addr, let offset):
             return try memory.readWord(fromAddressStartingAt: addr + UInt16(offset))
-//            return try memory.readWord(fromAddressStartingAt: resolvedAddr)
-
+            
         case .immediate, .implied, .accumulator, .stack:
             throw Error.noResolvedAddress
         }
@@ -197,6 +210,9 @@ extension Instruction.AddressingMode: Equatable, Hashable {
 
         case (.absoluteIndexed(let leftAddr, let leftOffset), .absoluteIndexed(let rightAddr, let rightOffset)),
              (.absoluteIndexedIndirect(let leftAddr, let leftOffset), .absoluteIndexedIndirect(let rightAddr, let rightOffset)):
+            return leftAddr == rightAddr && leftOffset == rightOffset
+
+        case (.zeroPageThenRelative(let leftAddr, let leftOffset), .zeroPageThenRelative(let rightAddr, let rightOffset)):
             return leftAddr == rightAddr && leftOffset == rightOffset
 
         case (.implied, .implied),
