@@ -9,7 +9,7 @@ final class AddressingModeTests: SystemTests {
     // checks that every single opcode is covered in one (and only one) of the static opcode addressing mode arrays
     func testOpcodesExhaustive() throws {
 
-        let allOpcodes:[UInt8] = [
+        let allOpcodes: [UInt8] = [
             Opcodes.absolute,
             Opcodes.absoluteIndexedIndirect,
             Opcodes.absoluteIndexedX,
@@ -77,7 +77,7 @@ final class AddressingModeTests: SystemTests {
         XCTAssert(try testOpcode(Opcodes.zeroPageIndexedIndirect[0], expectedSize: 2))
         XCTAssert(try testOpcode(Opcodes.zeroPageIndirectIndexed[0], expectedSize: 2))
         XCTAssert(try testOpcode(Opcodes.relative[0], expectedSize: 2))
-
+        XCTAssert(try testOpcode(Opcodes.zeroPageThenRelative[0], expectedSize: 3))
     }
 
     func testImplied() throws {

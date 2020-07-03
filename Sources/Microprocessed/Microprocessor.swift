@@ -376,43 +376,48 @@ extension Microprocessor {
 
         case .bra:
             try branch(on: true, addressingMode: instruction.addressingMode)
-
         case .beq:
             try branch(on: registers.statusFlags.contains(.isZero), addressingMode: instruction.addressingMode)
-
         case .bne:
             try branch(on: !registers.statusFlags.contains(.isZero), addressingMode: instruction.addressingMode)
-
         case .bcc:
             try branch(on: registers.statusFlags.contains(.didCarry), addressingMode: instruction.addressingMode)
-
         case .bcs:
             try branch(on: !registers.statusFlags.contains(.didCarry), addressingMode: instruction.addressingMode)
-
         case .bvs:
             try branch(on: registers.statusFlags.contains(.didOverflow), addressingMode: instruction.addressingMode)
-            
         case .bvc:
             try branch(on: !registers.statusFlags.contains(.didOverflow), addressingMode: instruction.addressingMode)
-
         case .bmi:
             try branch(on: registers.statusFlags.contains(.isNegative), addressingMode: instruction.addressingMode)
-
         case .bpl:
             try branch(on: !registers.statusFlags.contains(.isNegative), addressingMode: instruction.addressingMode)
-
         case .bbr:
             let mask = instruction.resetOpcodeBitMask
             let zeroPageAddr = try instruction.addressingMode.value(from: memory, registers: registers)
             let value = try memory.read(from: UInt16(zeroPageAddr))
 
             try branch(on: value & mask == 0, addressingMode: instruction.addressingMode)
-
         case .bbs:
             let mask = instruction.setOpcodeBitMask
             let value = try instruction.addressingMode.value(from: memory, registers: registers)
 
             try branch(on: value & mask > 0, addressingMode: instruction.addressingMode)
+
+        case .clc:
+            registers.clearCarry()
+        case .cld:
+            registers.clearDecimal()
+        case .cli:
+            registers.clearInterruptsDisabled()
+        case .clv:
+            registers.clearOverflow()
+        case .sec:
+            registers.setCarry()
+        case .sed:
+            registers.setDecimal()
+        case .sei:
+            registers.setInterruptsDisabled()
             
         case .nop:
             // already updated PC, so nothing to do

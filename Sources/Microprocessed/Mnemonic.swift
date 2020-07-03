@@ -96,6 +96,15 @@ extension Instruction {
         case bbr
         case bbs
 
+        // MARK: - Processor Status
+        case clc
+        case cld
+        case cli
+        case clv
+        case sec
+        case sed
+        case sei
+
         // MARK: - Miscellaneous
         case nop
         case undefined
@@ -229,6 +238,21 @@ extension Instruction {
                 self = .bbr
             case Opcodes.bbs:
                 self = .bbs
+
+            case Opcodes.clc:
+                self = .clc
+            case Opcodes.cld:
+                self = .cld
+            case Opcodes.cli:
+                self = .cli
+            case Opcodes.clv:
+                self = .clv
+            case Opcodes.sec:
+                self = .sec
+            case Opcodes.sed:
+                self = .sed
+            case Opcodes.sei:
+                self = .sei
 
             case Opcodes.noop:
                 self = .nop

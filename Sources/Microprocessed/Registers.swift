@@ -114,6 +114,14 @@ extension Registers {
     mutating func clearInterruptsDisabled() {
         SR &= ~StatusFlags.interruptsDisabled.rawValue
     }
+
+    mutating func setDecimal() {
+        SR |= StatusFlags.decimalMode.rawValue
+    }
+
+    mutating func clearDecimal() {
+        SR &= ~StatusFlags.decimalMode.rawValue
+    }
 }
 
 extension Registers {

@@ -95,6 +95,15 @@ extension Instruction.Mnemonic {
         static let bbr: [UInt8] = [0x0F, 0x1F, 0x2F, 0x3F, 0x4F, 0x5F, 0x6F, 0x7F]
         static let bbs: [UInt8] = [0x8F, 0x9F, 0xAF, 0xBF, 0xCF, 0xDF, 0xEF, 0xFF]
 
+        // MARK: - Processor Status
+        static let clc: [UInt8] = [0x18]
+        static let cld: [UInt8] = [0xD8]
+        static let cli: [UInt8] = [0x58]
+        static let clv: [UInt8] = [0xB8]
+        static let sec: [UInt8] = [0x38]
+        static let sed: [UInt8] = [0xF8]
+        static let sei: [UInt8] = [0x78]
+
         // MARK: - Miscellaneous
         static let noop: [UInt8] = [0xEA]
     }
