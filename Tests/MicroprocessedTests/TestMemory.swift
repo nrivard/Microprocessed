@@ -17,3 +17,12 @@ final class TestMemory: MemoryAddressable {
         memory[address] = data
     }
 }
+
+extension MemoryAddressable {
+
+    func writeProgram(_ program: [UInt8], startingAtAddress pc: UInt16) throws {
+        for (index, byte) in program.enumerated() {
+            try write(to: pc + UInt16(index), data: byte)
+        }
+    }
+}

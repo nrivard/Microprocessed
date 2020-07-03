@@ -15,9 +15,7 @@ final class SimpleProgramTest: SystemTests {
         try super.setUpWithError()
 
         // write the program
-        for (index, byte) in SimpleProgramTest.program.enumerated() {
-            try ram.write(to: mpu.registers.PC + UInt16(index), data: byte)
-        }
+        try ram.writeProgram(SimpleProgramTest.program, startingAtAddress: mpu.registers.PC)
 
         // and then write a zero to irqVector
         try ram.write(toAddressStartingAt: Microprocessor.irqVector, word: 0)
