@@ -66,3 +66,10 @@ extension Instruction {
         return 1 << ((opcode >> 4) - 0x08)
     }
 }
+
+extension Instruction: CustomStringConvertible {
+
+    public var description: String {
+        return String(format: "\(mnemonic) \(addressingMode)   ; \(opcode)")
+    }
+}

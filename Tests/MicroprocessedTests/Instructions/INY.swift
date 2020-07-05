@@ -9,14 +9,14 @@ final class INYTests: SystemTests {
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.Y == 0xD5)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
 
         mpu.registers.Y = 0xFF
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.Y == 0x00)
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 }

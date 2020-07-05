@@ -7,9 +7,9 @@ final class CLCTests: SystemTests {
         let opcode: UInt8 = 0x18
 
         mpu.registers.setCarry()
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
 
         try mpu.execute(opcode)
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.didCarry))
     }
 }

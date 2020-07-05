@@ -19,7 +19,7 @@ final class TSBTests: SystemTests {
 
             try mpu.execute(opcode, data: 0x2D)
             XCTAssert(try ram.read(from: 0x2D) == result)
-            XCTAssert(mpu.registers.statusFlags.contains(.isZero) == (result == 0))
+            XCTAssert(mpu.registers.$SR.contains(.isZero) == (result == 0))
         }
     }
 
@@ -32,7 +32,7 @@ final class TSBTests: SystemTests {
 
             try mpu.execute(opcode, word: 0xDDDD)
             XCTAssert(try ram.read(from: 0xDDDD) == result)
-            XCTAssert(mpu.registers.statusFlags.contains(.isZero) == (result == 0))
+            XCTAssert(mpu.registers.$SR.contains(.isZero) == (result == 0))
         }
     }
 }

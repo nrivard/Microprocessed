@@ -34,14 +34,14 @@ final class MicroprocessorTests: SystemTests {
 
         try mpu.interrupt()
         XCTAssert(mpu.registers.PC == irqAddress)
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
         XCTAssert(try mpu.pop() == status.subtracting(.isSoftwareInterrupt).rawValue)
         XCTAssert(try mpu.popWord() == returnAddress)
 
         // we artifically popped the stack but interrupts should still be disabled
         try mpu.interrupt()
         XCTAssert(mpu.registers.PC == irqAddress)
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
     }
 
     func testNonmaskableInterrupt() throws {
@@ -53,7 +53,7 @@ final class MicroprocessorTests: SystemTests {
 
         try mpu.nonMaskableInterrupt()
         XCTAssert(mpu.registers.PC == irqAddress)
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
         XCTAssert(try mpu.pop() == status.subtracting(.isSoftwareInterrupt).rawValue)
         XCTAssert(try mpu.popWord() == returnAddress)
 
@@ -64,7 +64,7 @@ final class MicroprocessorTests: SystemTests {
 
         try mpu.nonMaskableInterrupt()
         XCTAssert(mpu.registers.PC == anotherIRQAddress)
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
     }
 }
 
@@ -90,15 +90,15 @@ extension Microprocessor {
 
     func testLoadImmediateStatusFlags(for opcode: UInt8) throws {
         try execute(opcode, data: 0x00)
-        XCTAssert(registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(registers.statusFlags.contains(.isNegative))
+        XCTAssert(registers.$SR.contains(.isZero))
+        XCTAssertFalse(registers.$SR.contains(.isNegative))
 
         try execute(opcode, data: 0x80)
-        XCTAssertFalse(registers.statusFlags.contains(.isZero))
-        XCTAssert(registers.statusFlags.contains(.isNegative))
+        XCTAssertFalse(registers.$SR.contains(.isZero))
+        XCTAssert(registers.$SR.contains(.isNegative))
 
         try execute(opcode, data: 0x70)
-        XCTAssertFalse(registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(registers.statusFlags.contains(.isNegative))
+        XCTAssertFalse(registers.$SR.contains(.isZero))
+        XCTAssertFalse(registers.$SR.contains(.isNegative))
     }
 }

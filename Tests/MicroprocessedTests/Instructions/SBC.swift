@@ -121,7 +121,7 @@ extension SBCTests {
             try execution(input)
 
             XCTAssert(mpu.registers.A == result, String(format: "Expected %X, got %X", result, mpu.registers.A))
-            XCTAssert(mpu.registers.statusFlags == outputFlags, String(format: "Expected %X, got %X", outputFlags.rawValue, mpu.registers.statusFlags.rawValue))
+            XCTAssert(mpu.registers.$SR == outputFlags, String(format: "Expected %X, got %X", outputFlags.rawValue, mpu.registers.$SR.rawValue))
         }
     }
 }

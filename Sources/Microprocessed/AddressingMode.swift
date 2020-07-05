@@ -226,6 +226,48 @@ extension Instruction.AddressingMode: Equatable, Hashable {
     }
 }
 
+extension Instruction.AddressingMode: CustomStringConvertible {
+
+    public var description: String {
+        switch self {
+        case .implied, .accumulator, .stack:
+            return ""
+        case .immediate(let value):
+            return "#\(String(hex: value))"
+        case .zeroPage(let address):
+            return String(hex: address)
+        case .zeroPageIndirect(let address):
+            return "(\(String(hex: address)))"
+        case .zeroPageIndexed(let addr, let offset):
+            return "\(String(hex: addr)),\(String(hex: offset))"
+        case .zeroPageIndexedIndirect(let addr, offset: let offset):
+            return "(\(String(hex: addr)),\(String(hex: offset)))"
+        case .zeroPageIndirectIndexed(let addr, offset: let offset):
+            return "(\(String(hex: addr))),\(String(hex: offset))"
+        case .absolute(let addr):
+            return String(hex: addr)
+        case .absoluteIndirect(let addr):
+            return "(\(String(hex: addr)))"
+        case .absoluteIndexed(let addr, offset: let offset):
+            return "\(String(hex: addr)),\(String(hex: offset))"
+        case .absoluteIndexedIndirect(let addr, let offset):
+            return "(\(String(hex: addr)),\(String(hex: offset)))"
+        case .relative(let offset):
+            return String(hex: offset)
+        case .zeroPageThenRelative(let zp, let relative):
+            return "\(String(hex: zp)),\(String(hex: relative))"
+        }
+    }
+}
+
 func ~=<Value: Equatable>(array: [Value], value: Value) -> Bool {
     return array.contains(value)
+}
+
+extension String {
+
+    init<Hex>(hex: Hex) where Hex: FixedWidthInteger, Hex: CVarArg {
+        let size = MemoryLayout.size(ofValue: hex.self)
+        self = String(format: "$%.\(size * 2)X", hex)
+    }
 }

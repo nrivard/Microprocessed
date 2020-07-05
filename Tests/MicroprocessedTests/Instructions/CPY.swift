@@ -9,9 +9,9 @@ final class CPYTests: SystemTests {
 
         try mpu.execute(opcode, data: 0xA0)
         XCTAssert(mpu.registers.Y == 0xA0)
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
     }
 
     func testCPYZeroPage() throws {
@@ -21,9 +21,9 @@ final class CPYTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x00)
         XCTAssert(try ram.read(from: 0x00) == 0x8A) // memory untouched
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.didCarry))
     }
 
     func testCPYAbsolute() throws {
@@ -33,8 +33,8 @@ final class CPYTests: SystemTests {
         try ram.write(to: address, data: 0x01)
 
         try mpu.execute(opcode, word: address)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 }

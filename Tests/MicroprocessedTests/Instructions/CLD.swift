@@ -7,9 +7,9 @@ final class CLDTests: SystemTests {
         let opcode: UInt8 = 0xD8
 
         mpu.registers.setDecimal()
-        XCTAssert(mpu.registers.statusFlags.contains(.decimalMode))
+        XCTAssert(mpu.registers.$SR.contains(.decimalMode))
 
         try mpu.execute(opcode)
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.decimalMode))
+        XCTAssertFalse(mpu.registers.$SR.contains(.decimalMode))
     }
 }

@@ -9,9 +9,9 @@ final class CMPTests: SystemTests {
 
         try mpu.execute(opcode, data: 0xA0)
         XCTAssert(mpu.registers.A == 0xA0)
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
     }
 
     func testCMPZeroPage() throws {
@@ -21,9 +21,9 @@ final class CMPTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x00)
         XCTAssert(try ram.read(from: 0x00) == 0x8A) // memory untouched
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.didCarry))
     }
 
     func testCMPZeroPageIndexed() throws {
@@ -33,9 +33,9 @@ final class CMPTests: SystemTests {
         try ram.write(to: 0x0002, data: 0x10)
 
         try mpu.execute(opcode, data: 0x00)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
     }
 
     func testCMPAbsolute() throws {
@@ -45,9 +45,9 @@ final class CMPTests: SystemTests {
         try ram.write(to: address, data: 0x01)
 
         try mpu.execute(opcode, word: address)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 
     func testCMPAbsoluteIndexedX() throws {
@@ -59,9 +59,9 @@ final class CMPTests: SystemTests {
         try ram.write(to: finalAddress, data: 0x10)
 
         try mpu.execute(opcode, word: address)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 
     func testCMPAbsoluteIndexedY() throws {
@@ -73,9 +73,9 @@ final class CMPTests: SystemTests {
         try ram.write(to: finalAddress, data: 0x10)
 
         try mpu.execute(opcode, word: address)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 
     func testCMPIndexedIndirect() throws {
@@ -87,9 +87,9 @@ final class CMPTests: SystemTests {
         try ram.write(toAddressStartingAt: 0x0005, word: address)
 
         try mpu.execute(opcode, data: 0x00)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 
     func testCMPIndirectIndexed() throws {
@@ -102,9 +102,9 @@ final class CMPTests: SystemTests {
         try ram.write(toAddressStartingAt: 0x30, word: address)
 
         try mpu.execute(opcode, data: 0x30)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 
     func testCMPZeroPageIndirect() throws {
@@ -115,8 +115,8 @@ final class CMPTests: SystemTests {
         try ram.write(toAddressStartingAt: 0x0055, word: address)
 
         try mpu.execute(opcode, data: 0x55)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
     }
 }

@@ -7,9 +7,9 @@ final class CLITests: SystemTests {
         let opcode: UInt8 = 0x58
 
         mpu.registers.setInterruptsDisabled()
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
 
         try mpu.execute(opcode)
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssertFalse(mpu.registers.$SR.contains(.interruptsDisabled))
     }
 }

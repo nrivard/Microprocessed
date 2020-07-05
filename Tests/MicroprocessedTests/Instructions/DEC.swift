@@ -9,15 +9,15 @@ final class DECTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x10)
         XCTAssert(try ram.read(from: 0x0010) == opcode &- 1)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
 
         try ram.write(to: 0x011, data: 0x00)
 
         try mpu.execute(opcode, data: 0x11)
         XCTAssert(try ram.read(from: 0x0011)  == 0xFF)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
     }
 
     func testDECZeroPageIndexed() throws {
@@ -27,8 +27,8 @@ final class DECTests: SystemTests {
 
         try mpu.execute(opcode, data: 0x10)
         XCTAssert(try ram.read(from: 0x013) == opcode &- 1)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
     }
 
     func testDECAbsolute() throws {
@@ -47,7 +47,7 @@ final class DECTests: SystemTests {
 
         try mpu.execute(opcode, word: 0xF1F0)
         XCTAssert(try ram.read(from: 0xF1FA) == opcode &- 1)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
     }
 }

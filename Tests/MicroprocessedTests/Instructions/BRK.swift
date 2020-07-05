@@ -12,7 +12,7 @@ final class BRKTests: SystemTests {
 
         try mpu.execute(0x00)
         XCTAssert(mpu.registers.PC == irqAddress)
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
         XCTAssert(try mpu.pop() == status.rawValue)
         XCTAssert(try mpu.popWord() == returnAddress)
     }

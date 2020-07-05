@@ -52,7 +52,7 @@ extension Microprocessor {
     /// send an interrupt signal. This may be ignored if `interruptsDisabled` is enabled
     /// TODO: create a software originated variant of this for BRK
     public func interrupt() throws {
-        guard !registers.statusFlags.contains(.interruptsDisabled) else {
+        guard !registers.$SR.contains(.interruptsDisabled) else {
             return
         }
 
@@ -147,7 +147,6 @@ extension Microprocessor {
             } else if case .phy = instruction.mnemonic {
                 registerValue = registers.Y
             } else if case .php = instruction.mnemonic {
-                // shouldn't need to push this explicitly to the stack. it is always set
                 registerValue = registers.SR
             } else {
                 throw Error.undefinedInstruction
@@ -247,7 +246,7 @@ extension Microprocessor {
 
         case .rol:
             let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
-            let result = (value << 1) | (registers.statusFlags.contains(.didCarry) ? 1 : 0)
+            let result = (value << 1) | (registers.$SR.contains(.didCarry) ? 1 : 0)
 
             updateSignZero(for: result)
             registers.updateCarry(for: result)
@@ -256,7 +255,7 @@ extension Microprocessor {
 
         case .ror:
             let value = UInt16(try instruction.addressingMode.value(from: memory, registers: registers))
-            let result = (value >> 1) | UInt16(registers.statusFlags.contains(.didCarry) ? (1 << 7) : 0)
+            let result = (value >> 1) | UInt16(registers.$SR.contains(.didCarry) ? (1 << 7) : 0)
 
             updateSignZero(for: result)
 
@@ -362,27 +361,27 @@ extension Microprocessor {
 
         case .rti:
             // restore status register first. make sure to set `isSoftwareInterrupt` as this is always a `1` in the actual register
-            registers.SR = try pop() | StatusFlags.isSoftwareInterrupt.rawValue
+            registers.SR = try pop()
             registers.PC = try popWord()
 
         case .bra:
             try branch(on: true, addressingMode: instruction.addressingMode)
         case .beq:
-            try branch(on: registers.statusFlags.contains(.isZero), addressingMode: instruction.addressingMode)
+            try branch(on: registers.$SR.contains(.isZero), addressingMode: instruction.addressingMode)
         case .bne:
-            try branch(on: !registers.statusFlags.contains(.isZero), addressingMode: instruction.addressingMode)
+            try branch(on: !registers.$SR.contains(.isZero), addressingMode: instruction.addressingMode)
         case .bcc:
-            try branch(on: registers.statusFlags.contains(.didCarry), addressingMode: instruction.addressingMode)
+            try branch(on: !registers.$SR.contains(.didCarry), addressingMode: instruction.addressingMode)
         case .bcs:
-            try branch(on: !registers.statusFlags.contains(.didCarry), addressingMode: instruction.addressingMode)
+            try branch(on: registers.$SR.contains(.didCarry), addressingMode: instruction.addressingMode)
         case .bvs:
-            try branch(on: registers.statusFlags.contains(.didOverflow), addressingMode: instruction.addressingMode)
+            try branch(on: registers.$SR.contains(.didOverflow), addressingMode: instruction.addressingMode)
         case .bvc:
-            try branch(on: !registers.statusFlags.contains(.didOverflow), addressingMode: instruction.addressingMode)
+            try branch(on: !registers.$SR.contains(.didOverflow), addressingMode: instruction.addressingMode)
         case .bmi:
-            try branch(on: registers.statusFlags.contains(.isNegative), addressingMode: instruction.addressingMode)
+            try branch(on: registers.$SR.contains(.isNegative), addressingMode: instruction.addressingMode)
         case .bpl:
-            try branch(on: !registers.statusFlags.contains(.isNegative), addressingMode: instruction.addressingMode)
+            try branch(on: !registers.$SR.contains(.isNegative), addressingMode: instruction.addressingMode)
         case .bbr:
             let mask = instruction.resetOpcodeBitMask
             let zeroPageAddr = try instruction.addressingMode.value(from: memory, registers: registers)
@@ -476,6 +475,19 @@ extension Microprocessor {
         registers.updateZero(for: result)
         registers.updateCarry(for: result)
         registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
+
+        if registers.$SR.contains(.decimalMode) {
+            registers.clearCarry()
+
+            if registers.A & 0x0F > 0x09 {
+                registers.A += 0x06
+            }
+
+            if registers.A & 0xF0 > 0x90 {
+                registers.A += 0x60
+                registers.setCarry()
+            }
+        }
 
         registers.A = result.truncated
     }

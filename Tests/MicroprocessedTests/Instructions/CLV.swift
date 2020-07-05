@@ -7,9 +7,9 @@ final class CLVTests: SystemTests {
         let opcode: UInt8 = 0xB8
 
         mpu.registers.setOverflow()
-        XCTAssert(mpu.registers.statusFlags.contains(.didOverflow))
+        XCTAssert(mpu.registers.$SR.contains(.didOverflow))
 
         try mpu.execute(opcode)
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.didOverflow))
+        XCTAssertFalse(mpu.registers.$SR.contains(.didOverflow))
     }
 }

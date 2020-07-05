@@ -24,50 +24,50 @@ final class SimpleProgramTest: SystemTests {
     func testSimpleProgram() throws {
         try mpu.tick()
         XCTAssert(mpu.registers.A == 0xFD)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
         XCTAssert(mpu.registers.PC == 0x8002)
 
         try mpu.tick()
         XCTAssert(mpu.registers.A == 0xFE)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
         XCTAssert(mpu.registers.PC == 0x8004)
 
         try mpu.tick()
         XCTAssert(mpu.registers.A == 0xFE)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
         XCTAssert(mpu.registers.PC == 0x8002)
 
         try mpu.tick()
         XCTAssert(mpu.registers.A == 0xFF)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
         XCTAssert(mpu.registers.PC == 0x8004)
 
         try mpu.tick()
         XCTAssert(mpu.registers.A == 0xFF)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
         XCTAssert(mpu.registers.PC == 0x8002)
 
         try mpu.tick()
         XCTAssert(mpu.registers.A == 0x00)
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssert(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
         XCTAssert(mpu.registers.PC == 0x8004)
 
         try mpu.tick()
         XCTAssert(mpu.registers.PC == 0x8006)
 
-        let statusFlags = mpu.registers.statusFlags
+        let statusFlags = mpu.registers.$SR
         let pc = mpu.registers.PC
 
         try mpu.tick()
         XCTAssert(mpu.registers.PC == 0)
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
         XCTAssert(try mpu.pop() == statusFlags.rawValue)
         XCTAssert(try mpu.popWord() == pc + 1)
     }

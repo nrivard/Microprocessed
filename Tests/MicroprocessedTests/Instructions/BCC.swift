@@ -4,6 +4,6 @@ import XCTest
 final class BCCTests: SystemTests {
 
     func testBCC() throws {
-        try runBranchTest(opcode: 0x90, notTakenCondition: mpu.registers.clearCarry(), takenCondition: mpu.registers.setCarry())
+        try runBranchTest(opcode: 0x90, notTakenCondition: mpu.registers.setCarry(), takenCondition: mpu.registers.clearCarry())
     }
 }

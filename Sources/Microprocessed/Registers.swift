@@ -23,18 +23,10 @@ public struct Registers: Equatable, Hashable {
     public var SP: UInt8 = 0
     
     /// Status register
-    public var SR: UInt8 = StatusFlags(arrayLiteral: [.isSoftwareInterrupt, .alwaysSet]).rawValue
+    @HardwareStatusFlags public var SR: UInt8 = 0
     
     /// Program counter
     public var PC: UInt16 = 0
-}
-
-extension Registers {
-
-    /// nicer interface into the status register that can be easily queried
-    public var statusFlags: StatusFlags {
-        return .init(rawValue: SR)
-    }
 }
 
 extension Registers {
@@ -132,5 +124,29 @@ extension Registers {
 
     var arithmeticCarry: UInt8 {
         return (SR & StatusFlags.didCarry.rawValue) > 0 ? 1 : 0
+    }
+}
+
+/// Wraps the underlying value at the hardware level. This will always return `alwaysSet` and `isSoftwareInterrupt` as those
+/// can only be something else on the stack, never at the hardware level
+@propertyWrapper
+public struct HardwareStatusFlags: Equatable, Hashable {
+
+    private var status: UInt8
+
+    public var wrappedValue: UInt8 {
+        get {
+            return status | StatusFlags.alwaysSet.rawValue | StatusFlags.isSoftwareInterrupt.rawValue
+        } set {
+            self.status = newValue
+        }
+    }
+
+    public var projectedValue: StatusFlags {
+        return StatusFlags(rawValue: wrappedValue)
+    }
+
+    public init(wrappedValue: UInt8) {
+        self.status = wrappedValue
     }
 }

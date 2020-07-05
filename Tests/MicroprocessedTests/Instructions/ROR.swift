@@ -90,14 +90,14 @@ final class RORTests: SystemTests {
 extension RORTests {
 
     private func assertEndStatusFlags() {
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.didCarry))
     }
 
     private func assertStartStatusFlags() {
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
     }
 }

@@ -9,7 +9,7 @@ final class TSXTests: SystemTests {
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.X == mpu.registers.SP)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
     }
 }

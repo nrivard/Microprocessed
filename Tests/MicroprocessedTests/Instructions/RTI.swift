@@ -14,6 +14,6 @@ final class RTITests: SystemTests {
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.PC == returnAddress)
-        XCTAssert(mpu.registers.statusFlags == restoredSR.union(.isSoftwareInterrupt))
+        XCTAssert(mpu.registers.$SR == restoredSR.union(.isSoftwareInterrupt))
     }
 }

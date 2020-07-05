@@ -7,9 +7,9 @@ final class SECTests: SystemTests {
         let opcode: UInt8 = 0x38
 
         mpu.registers.clearCarry()
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssertFalse(mpu.registers.$SR.contains(.didCarry))
 
         try mpu.execute(opcode)
-        XCTAssert(mpu.registers.statusFlags.contains(.didCarry))
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
     }
 }

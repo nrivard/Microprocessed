@@ -7,9 +7,9 @@ final class SEITests: SystemTests {
         let opcode: UInt8 = 0x78
 
         mpu.registers.clearInterruptsDisabled()
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssertFalse(mpu.registers.$SR.contains(.interruptsDisabled))
 
         try mpu.execute(opcode)
-        XCTAssert(mpu.registers.statusFlags.contains(.interruptsDisabled))
+        XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
     }
 }

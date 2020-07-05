@@ -107,7 +107,7 @@ extension EORTests {
 
     private func assertValueAndFlags() {
         XCTAssert(mpu.registers.A == EORTests.resultValue)
-        XCTAssert(mpu.registers.statusFlags.contains(.isNegative))
-        XCTAssertFalse(mpu.registers.statusFlags.contains(.isZero))
+        XCTAssert(mpu.registers.$SR.contains(.isNegative))
+        XCTAssertFalse(mpu.registers.$SR.contains(.isZero))
     }
 }
