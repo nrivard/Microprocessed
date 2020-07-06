@@ -65,7 +65,10 @@ extension Microprocessor {
     }
 
     private func interrupt(toVector vector: UInt16, isHardware: Bool) throws {
-        try pushWord(registers.PC)
+        // BRK instruction is actually supposed to push PC + 2, but it's addressing mode is `stack` which is size `1`. So if this is a software IRQ,
+        // we need to compensate by adding 1 to PC
+        let softwareOffset: UInt16 = isHardware ? 0 : 1
+        try pushWord(registers.PC + softwareOffset)
 
         let mask: UInt8 = isHardware ? ~StatusFlags.isSoftwareInterrupt.rawValue : 0xFF
         try push(registers.SR & mask)
@@ -425,6 +428,7 @@ extension Microprocessor {
         case .nop:
             // already updated PC, so nothing to do
             break
+
         case .brk:
             try interrupt(toVector: Microprocessor.irqVector, isHardware: false)
 

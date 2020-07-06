@@ -6,7 +6,10 @@ final class FunctionalTests: SystemTests {
     static let successTrapAddress: UInt16 = 0x3399
 
     private let breakpoints: [UInt16] = [
-        0x0670
+        0x09D1 - 2,
+        0x09D1,
+        successTrapAddress,
+        0x35D1
     ]
 
     enum Error: Swift.Error {
@@ -65,7 +68,7 @@ final class FunctionalTests: SystemTests {
             }
         }
 
-        waitForExpectations(timeout: 30)
+        waitForExpectations(timeout: 600)
     }
 }
 

@@ -12,14 +12,14 @@ extension Microprocessor {
     public static let stackPointerBase: UInt16 = 0x0100
 
     func pop() throws -> UInt8 {
-        registers.SP += 1 // TODO: wrapping around?
+        registers.SP = registers.SP &+ 1
 
         return try memory.read(from: stackPointerAddress)
     }
 
     func push(_ value: UInt8) throws {
         try memory.write(to: stackPointerAddress, data: value)
-        registers.SP -= 1 // TODO: wrapping around?
+        registers.SP = registers.SP &- 1
     }
 }
 
