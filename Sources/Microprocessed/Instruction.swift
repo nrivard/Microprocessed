@@ -11,12 +11,8 @@ import Foundation
 public struct Instruction {
 
     public let opcode: UInt8
+    public let mnemonic: Mnemonic
     public let addressingMode: AddressingMode
-
-    /// the human readable mnemonic of the instruction
-    public var mnemonic: Mnemonic {
-        return Mnemonic(opcode)
-    }
 
     /// the memory span of the instruction
     public var size: UInt16 {
@@ -38,7 +34,8 @@ public struct Instruction {
     /// creates an instruction from memory with given register state.
     init(memory: MemoryAddressable, registers: Registers) throws {
         self.opcode = try memory.read(from: registers.PC)
-        self.addressingMode = try AddressingMode(opcode, memory: memory, registers: registers)
+        self.mnemonic = .init(opcode)
+        self.addressingMode = try .init(opcode, memory: memory, registers: registers)
     }
 
 //    /// create a hardcoded instruction. potentially useful for testing

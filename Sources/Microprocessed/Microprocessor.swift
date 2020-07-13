@@ -140,22 +140,14 @@ extension Microprocessor {
 
             try memory.write(to: addr, data: registerValue)
 
-        case .pha, .phx, .phy, .php:
-            let registerValue: UInt8
-
-            if case .pha = instruction.mnemonic {
-                registerValue = registers.A
-            } else if case .phx = instruction.mnemonic {
-                registerValue = registers.X
-            } else if case .phy = instruction.mnemonic {
-                registerValue = registers.Y
-            } else if case .php = instruction.mnemonic {
-                registerValue = registers.SR
-            } else {
-                throw Error.undefinedInstruction
-            }
-
-            try push(registerValue)
+        case .pha:
+            try push(registers.A)
+        case .phx:
+            try push(registers.X)
+        case .phy:
+            try push(registers.Y)
+        case .php:
+            try push(registers.SR)
 
         case .pla, .plx, .ply, .plp:
             let result = try pop()
@@ -182,21 +174,21 @@ extension Microprocessor {
             updateSignZero(for: registers.X)
 
         case .ina, .inx, .iny, .inc:
-            let result: UInt8
+            let result: UInt16
 
             if case .ina = instruction.mnemonic {
-                result = registers.A &+ 1
-                registers.A = result
+                result = UInt16(registers.A) + 1
+                registers.A = result.truncated
             } else if case .inx = instruction.mnemonic {
-                result = registers.X &+ 1
-                registers.X = result
+                result = UInt16(registers.X) + 1
+                registers.X = result.truncated
             } else if case .iny = instruction.mnemonic {
-                result = registers.Y &+ 1
-                registers.Y = result
+                result = UInt16(registers.Y) + 1
+                registers.Y = result.truncated
             } else if case .inc = instruction.mnemonic {
                 let addr = try instruction.addressingMode.address(from: memory, registers: registers)
-                result = try instruction.addressingMode.value(from: memory, registers: registers) &+ 1
-                try memory.write(to: addr, data: result)
+                result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers)) + 1
+                try memory.write(to: addr, data: result.truncated)
             } else {
                 throw Error.undefinedInstruction
             }
@@ -344,9 +336,15 @@ extension Microprocessor {
             arithmeticAdd(value)
 
         case .sbc:
-            // this performs a 2s complement addition (if `carry` is set) since we can handle overflow but not underflow.
-            // also just how this damn proc works
-            let value = ~(try instruction.addressingMode.value(from: memory, registers: registers))
+            let value: UInt8
+            let byte = try instruction.addressingMode.value(from: memory, registers: registers)
+            if registers.$SR.contains(.decimalMode) {
+                // a 10's complement operand
+                value = 0x99 &- byte
+            } else {
+                // a 1's complement operand. with carry this will become 2's complement
+                value = ~byte
+            }
             arithmeticAdd(value)
 
         case .jmp:
@@ -470,30 +468,47 @@ extension Microprocessor {
         } else {
             registers.clearCarry()
         }
+
+//        print("Comparing \(register.hex) - \(value.hex) = \(result.hex)")
     }
 
     private func arithmeticAdd(_ value: UInt8) {
-        let result = [registers.A, value, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+        let result: UInt16
+        
+        if !registers.$SR.contains(.decimalMode) {
+            result = [registers.A, value, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+            registers.updateCarry(for: result)
+        } else {
+            var lowByte = (registers.A & 0x0F) + (value & 0x0F) + registers.arithmeticCarry
+            var highByte = (registers.A & 0xF0) + (value & 0x0F)
+            var shouldCarry = false
+
+            if lowByte >= 0x0A {
+                lowByte -= 0x0A
+                highByte += 0x10
+            }
+
+            if highByte >= 0xA0 {
+                highByte -= 0xA0
+                shouldCarry = true
+            }
+
+            if shouldCarry {
+                registers.setCarry()
+            } else {
+                registers.clearCarry()
+            }
+
+            result = UInt16(highByte << 4) | UInt16(lowByte)
+        }
 
         registers.updateSign(for: result)
         registers.updateZero(for: result)
-        registers.updateCarry(for: result)
         registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
 
-        if registers.$SR.contains(.decimalMode) {
-            registers.clearCarry()
-
-            if registers.A & 0x0F > 0x09 {
-                registers.A += 0x06
-            }
-
-            if registers.A & 0xF0 > 0x90 {
-                registers.A += 0x60
-                registers.setCarry()
-            }
-        }
-
         registers.A = result.truncated
+
+//        print("Adding \(registers.A.hex) + \(value.hex) = \(registers.A.hex), SR: \(registers.SR.bin)")
     }
 
     private func branch(on condition: @autoclosure () throws -> Bool, addressingMode: Instruction.AddressingMode) throws {

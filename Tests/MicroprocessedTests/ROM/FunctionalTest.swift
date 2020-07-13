@@ -1,15 +1,23 @@
 import XCTest
 @testable import Microprocessed
 
-final class FunctionalTests: SystemTests {
+final class FunctionalTests: XCTestCase {
+
+    var ram: MemoryAddressable!
+    var mpu: Microprocessor!
+
+    var runQueue = DispatchQueue(label: "Microprocessor", qos: .userInteractive, attributes: [], autoreleaseFrequency: .workItem)
 
     static let successTrapAddress: UInt16 = 0x3399
 
-    private let breakpoints: [UInt16] = [
-        0x09D1 - 2,
-        0x09D1,
+    private let breakpoints: Set<UInt16> = [
         successTrapAddress,
-        0x35D1
+//        0x35D1,
+//        0x332B,
+//        0x3328, // ; JSR to CHKDAD
+//        0x36EC, // ; RTS from CHKDAD
+//        0x3345, // ; BNE inner loop
+        0x335F
     ]
 
     enum Error: Swift.Error {
@@ -28,19 +36,24 @@ final class FunctionalTests: SystemTests {
         let data = try Data(contentsOf: path)
         let bytes: [UInt8] = .init(data)
 
-        try ram.writeProgram(bytes, startingAtAddress: 0x00)
+        self.ram = ROMMemory(rom: bytes)
+        self.mpu = Microprocessor(memoryLayout: ram)
+
+        try mpu.reset()
     }
 
     func testRunFunctionalTests() throws {
         let testExp = self.expectation(description: "Running Klaus functional test suite")
 
-        DispatchQueue.global().async { [self] in
+        runQueue.async { [self] in
             // test requires PC be $0400
-            mpu.registers.PC = 0x0400
+            mpu.registers.PC = 0x336D // set to start of decimal tests for now
             var shouldRun = true
+//            var start: Date = .init()
 
             /// the last 50 memory addresses and the instruction run there
             var instructions: [(UInt16, Instruction)] = []
+            var instrCount = 0
 
             while shouldRun {
                 let pc = mpu.registers.PC
@@ -49,26 +62,33 @@ final class FunctionalTests: SystemTests {
                     let instr = try mpu.fetch()
 
                     if breakpoints.contains(pc) {
-                        print("BREAKPOINT")
+                        switch pc {
+                        case 0x335F:
+                            print("Outerloop BNE: \(mpu.registers.A)")
+                        default:
+                            break
+                        }
                     }
-
+//
                     instructions.append((pc, instr))
                     instructions = instructions.suffix(50)
 
                     try mpu.execute(instr)
-
-                    if mpu.registers.PC == pc {
-                        XCTAssert(pc == FunctionalTests.successTrapAddress, "Failure found at \(String(hex: pc))\nLast \(instructions.count) instructions: \(instructions)")
-                        testExp.fulfill()
-                        shouldRun = false
-                    }
+                    instrCount += 1
                 } catch {
                     XCTAssert(false, "Encountered error: \(error)")
+                }
+
+                if mpu.registers.PC == pc {
+//                    print(Date().timeIntervalSince1970 - start.timeIntervalSince1970)
+                    XCTAssert(pc == FunctionalTests.successTrapAddress, "Failure found at \(pc.hex)\nExecuted (NEW) \(instrCount) instructions")
+                    testExp.fulfill()
+                    shouldRun = false
                 }
             }
         }
 
-        waitForExpectations(timeout: 600)
+        waitForExpectations(timeout: 120)
     }
 }
 

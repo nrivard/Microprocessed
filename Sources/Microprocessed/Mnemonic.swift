@@ -271,7 +271,7 @@ extension Instruction {
             case Opcodes.tya:
                 self = .tya
 
-            case Opcodes.noop:
+            case Opcodes.nop:
                 self = .nop
             case Opcodes.brk:
                 self = .brk

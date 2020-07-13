@@ -61,23 +61,23 @@ final class AddressingModeTests: SystemTests {
             return instr.size == expectedSize
         }
 
-        XCTAssert(try testOpcode(Opcodes.accumulator[0], expectedSize: 1))
-        XCTAssert(try testOpcode(Opcodes.implied[0], expectedSize: 1))
-        XCTAssert(try testOpcode(Opcodes.stack[0], expectedSize: 1))
-        XCTAssert(try testOpcode(Opcodes.immediate[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.absolute[0], expectedSize: 3))
-        XCTAssert(try testOpcode(Opcodes.absoluteIndexedX[0], expectedSize: 3))
-        XCTAssert(try testOpcode(Opcodes.absoluteIndexedY[0], expectedSize: 3))
-        XCTAssert(try testOpcode(Opcodes.absoluteIndirect[0], expectedSize: 3))
-        XCTAssert(try testOpcode(Opcodes.absoluteIndexedIndirect[0], expectedSize: 3))
-        XCTAssert(try testOpcode(Opcodes.zeroPage[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedX[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedY[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.zeroPageIndirect[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedIndirect[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.zeroPageIndirectIndexed[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.relative[0], expectedSize: 2))
-        XCTAssert(try testOpcode(Opcodes.zeroPageThenRelative[0], expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.accumulator.first!, expectedSize: 1))
+        XCTAssert(try testOpcode(Opcodes.implied.first!, expectedSize: 1))
+        XCTAssert(try testOpcode(Opcodes.stack.first!, expectedSize: 1))
+        XCTAssert(try testOpcode(Opcodes.immediate.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.absolute.first!, expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndexedX.first!, expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndexedY.first!, expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndirect.first!, expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.absoluteIndexedIndirect.first!, expectedSize: 3))
+        XCTAssert(try testOpcode(Opcodes.zeroPage.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedX.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedY.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndirect.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndexedIndirect.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageIndirectIndexed.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.relative.first!, expectedSize: 2))
+        XCTAssert(try testOpcode(Opcodes.zeroPageThenRelative.first!, expectedSize: 3))
     }
 
     func testImplied() throws {
@@ -115,7 +115,7 @@ final class AddressingModeTests: SystemTests {
     }
 
     func testImmediate() throws {
-        let immediateOpcodes: [UInt8] = Opcodes.immediate
+        let immediateOpcodes = Opcodes.immediate
 
         for opcode in immediateOpcodes {
             try ram.write(to: mpu.registers.PC, data: opcode)
@@ -281,7 +281,7 @@ final class AddressingModeTests: SystemTests {
         // test wraparound
         mpu.registers.X = 0x81
         try ram.write(to: UInt16(zeroPageBase &+ mpu.registers.X), data: 0xAA)
-        try ram.write(to: mpu.registers.PC, data: Opcodes.zeroPageIndexedX[0])
+        try ram.write(to: mpu.registers.PC, data: Opcodes.zeroPageIndexedX.first!)
         try ram.write(to: mpu.registers.PC + 1, data: zeroPageBase)
 
         let addressingMode = try mpu.fetch().addressingMode

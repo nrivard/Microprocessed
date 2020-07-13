@@ -9,7 +9,7 @@ final class PLPTests: SystemTests {
         let sp = mpu.stackPointerAddress
 
         try mpu.execute(opcode)
-        XCTAssert(mpu.registers.SR == 0b10101010)
+        XCTAssert(mpu.registers.SR == 0b10111010) // 4 and 5 are _always_ set in the actual MPU
         XCTAssert(mpu.stackPointerAddress == sp + 1)
     }
 }

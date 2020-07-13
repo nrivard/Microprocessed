@@ -233,41 +233,45 @@ extension Instruction.AddressingMode: CustomStringConvertible {
         case .implied, .accumulator, .stack:
             return ""
         case .immediate(let value):
-            return "#\(String(hex: value))"
+            return "#\(value.hex)"
         case .zeroPage(let address):
-            return String(hex: address)
+            return address.hex
         case .zeroPageIndirect(let address):
-            return "(\(String(hex: address)))"
+            return "(\(address.hex))"
         case .zeroPageIndexed(let addr, let offset):
-            return "\(String(hex: addr)),\(String(hex: offset))"
+            return "\(addr.hex),\(offset.hex)"
         case .zeroPageIndexedIndirect(let addr, offset: let offset):
-            return "(\(String(hex: addr)),\(String(hex: offset)))"
+            return "(\(addr.hex),\(offset.hex))"
         case .zeroPageIndirectIndexed(let addr, offset: let offset):
-            return "(\(String(hex: addr))),\(String(hex: offset))"
+            return "(\(addr.hex)),\(offset.hex)"
         case .absolute(let addr):
-            return String(hex: addr)
+            return addr.hex
         case .absoluteIndirect(let addr):
-            return "(\(String(hex: addr)))"
+            return "(\(addr.hex))"
         case .absoluteIndexed(let addr, offset: let offset):
-            return "\(String(hex: addr)),\(String(hex: offset))"
+            return "\(addr.hex),\(offset.hex)"
         case .absoluteIndexedIndirect(let addr, let offset):
-            return "(\(String(hex: addr)),\(String(hex: offset)))"
+            return "(\(addr.hex),\(offset.hex))"
         case .relative(let offset):
-            return String(hex: offset)
+            return offset.hex
         case .zeroPageThenRelative(let zp, let relative):
-            return "\(String(hex: zp)),\(String(hex: relative))"
+            return "\(zp.hex),\(relative.hex)"
         }
     }
 }
 
-func ~=<Value: Equatable>(array: [Value], value: Value) -> Bool {
-    return array.contains(value)
+func ~=<Values: Sequence>(sequence: Values, value: Values.Element) -> Bool where Values.Element: Equatable {
+    return sequence.contains(value)
 }
 
-extension String {
+//
+extension FixedWidthInteger {
 
-    init<Hex>(hex: Hex) where Hex: FixedWidthInteger, Hex: CVarArg {
-        let size = MemoryLayout.size(ofValue: hex.self)
-        self = String(format: "$%.\(size * 2)X", hex)
+    public var hex: String {
+        return "0x" + String(self, radix: 16, uppercase: true)
+    }
+
+    var bin: String {
+        return "0b" + String(self, radix: 2, uppercase: true)
     }
 }

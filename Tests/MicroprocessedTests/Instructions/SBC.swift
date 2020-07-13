@@ -120,8 +120,9 @@ extension SBCTests {
 
             try execution(input)
 
+            let realWorld = outputFlags.union([.alwaysSet, .isSoftwareInterrupt])
             XCTAssert(mpu.registers.A == result, String(format: "Expected %X, got %X", result, mpu.registers.A))
-            XCTAssert(mpu.registers.$SR == outputFlags, String(format: "Expected %X, got %X", outputFlags.rawValue, mpu.registers.$SR.rawValue))
+            XCTAssert(mpu.registers.$SR == realWorld, String(format: "Expected %X, got %X", outputFlags.rawValue, mpu.registers.$SR.rawValue))
         }
     }
 }

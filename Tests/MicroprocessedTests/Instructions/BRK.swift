@@ -4,7 +4,7 @@ import XCTest
 final class BRKTests: SystemTests {
 
     func testBRK() throws {
-        let returnAddress = mpu.registers.PC + 1
+        let returnAddress = mpu.registers.PC + 2
         let irqAddress: UInt16 = 0xA5DF
         let status: StatusFlags = [.isNegative, .didCarry, .didOverflow, .alwaysSet, .isSoftwareInterrupt]
         try ram.write(toAddressStartingAt: Microprocessor.irqVector, word: irqAddress)
