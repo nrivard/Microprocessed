@@ -1,7 +1,7 @@
 import XCTest
 @testable import Microprocessed
 
-final class FunctionalTests: XCTestCase {
+final class ExtendedOpcodeTests: XCTestCase {
 
     var ram: MemoryAddressable!
     var mpu: Microprocessor!
@@ -11,13 +11,7 @@ final class FunctionalTests: XCTestCase {
     static let successTrapAddress: UInt16 = 0x3399
 
     private let breakpoints: Set<UInt16> = [
-        successTrapAddress,
-//        0x35D1,
-//        0x332B,
-//        0x3328, // ; JSR to CHKDAD
-//        0x36EC, // ; RTS from CHKDAD
-//        0x3345, // ; BNE inner loop
-        0x335F
+        0x072a
     ]
 
     enum Error: Swift.Error {
@@ -29,7 +23,7 @@ final class FunctionalTests: XCTestCase {
         try super.setUpWithError()
 
         // next, read in the program from a file and write to ram
-        guard let path = Bundle.module.url(forResource: "6502_functional_test", withExtension: "bin") else {
+        guard let path = Bundle.module.url(forResource: "65C02_extended_opcodes_test", withExtension: "bin") else {
             throw Error.missingBinaryResource
         }
 
@@ -42,14 +36,13 @@ final class FunctionalTests: XCTestCase {
         try mpu.reset()
     }
 
-    func testRunFunctionalTests() throws {
+    func testRunExtendedOpcodesTests() throws {
         let testExp = self.expectation(description: "Running Klaus functional test suite")
 
         runQueue.async { [self] in
             // test requires PC be $0400
-            mpu.registers.PC = 0x0400 // set to start of decimal tests for now
+            mpu.registers.PC = 0x0400
             var shouldRun = true
-//            var start: Date = .init()
 
             /// the last 50 memory addresses and the instruction run there
             var instructions: [(UInt16, Instruction)] = []
@@ -63,8 +56,6 @@ final class FunctionalTests: XCTestCase {
 
                     if breakpoints.contains(pc) {
                         switch pc {
-                        case 0x335F:
-                            print("Outerloop BNE: \(mpu.registers.A)")
                         default:
                             break
                         }
@@ -80,7 +71,6 @@ final class FunctionalTests: XCTestCase {
                 }
 
                 if mpu.registers.PC == pc {
-//                    print(Date().timeIntervalSince1970 - start.timeIntervalSince1970)
                     XCTAssert(pc == FunctionalTests.successTrapAddress, "Failure found at \(pc.hex)\nExecuted (NEW) \(instrCount) instructions")
                     testExp.fulfill()
                     shouldRun = false

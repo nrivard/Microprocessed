@@ -52,7 +52,7 @@ extension Instruction {
     ///
     /// ex: RMB4 has an opcode of 0x47 which resets bit 4
     var resetOpcodeBitMask: UInt8 {
-        return ~(1 << (opcode >> 4))
+        return (1 << (opcode >> 4))
     }
 
     /// returns a mask with the bit index based on a `set` opcode. This is suitable for use with the SMB• and BBS• instructions

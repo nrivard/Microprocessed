@@ -320,7 +320,7 @@ extension Microprocessor {
             try save(result, addressingMode: instruction.addressingMode)
 
         case .rmb:
-            let mask = instruction.resetOpcodeBitMask
+            let mask = ~instruction.resetOpcodeBitMask
             let result = UInt16(try instruction.addressingMode.value(from: memory, registers: registers) & mask)
 
             try save(result, addressingMode: instruction.addressingMode)
@@ -385,10 +385,10 @@ extension Microprocessor {
             try branch(on: !registers.$SR.contains(.isNegative), addressingMode: instruction.addressingMode)
         case .bbr:
             let mask = instruction.resetOpcodeBitMask
-            let zeroPageAddr = try instruction.addressingMode.value(from: memory, registers: registers)
-            let value = try memory.read(from: UInt16(zeroPageAddr))
+            // invert the value to test if the bit is zero
+            let value = ~(try instruction.addressingMode.value(from: memory, registers: registers))
 
-            try branch(on: value & mask == 0, addressingMode: instruction.addressingMode)
+            try branch(on: value & mask > 0, addressingMode: instruction.addressingMode)
         case .bbs:
             let mask = instruction.setOpcodeBitMask
             let value = try instruction.addressingMode.value(from: memory, registers: registers)

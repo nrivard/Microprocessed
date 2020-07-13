@@ -22,7 +22,8 @@ let package = Package(
             name: "MicroprocessedTests",
             dependencies: ["Microprocessed"],
             resources: [
-                .copy("ROM/6502_functional_test.bin")
+                .copy("ROM/6502_functional_test.bin"),
+                .copy("ROM/65C02_extended_opcodes_test.bin")
             ]),
     ]
 )
