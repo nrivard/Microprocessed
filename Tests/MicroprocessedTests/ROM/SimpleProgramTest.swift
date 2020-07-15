@@ -69,6 +69,6 @@ final class SimpleProgramTest: SystemTests {
         XCTAssert(mpu.registers.PC == 0)
         XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
         XCTAssert(try mpu.pop() == statusFlags.rawValue)
-        XCTAssert(try mpu.popWord() == pc + 1)
+        XCTAssert(try mpu.popWord() == pc + 2)
     }
 }

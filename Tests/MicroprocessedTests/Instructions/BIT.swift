@@ -5,11 +5,11 @@ final class BITTests: SystemTests {
 
     /// results. `interrupts_disabled` is set in setup and should remain unchanged in _all_ tests
     static let results: [(memory: UInt8, result: UInt8)] = [
-        (0b1000_0000, 0b1010_0100),
-        (0b0100_0000, 0b0110_0100),
-        (0b0011_1111, 0b0010_0100),
-        (0b0000_0000, 0b0010_0110),
-        (0b1100_1111, 0b1110_0100)
+        (0b1000_0000, 0b1011_0100),
+        (0b0100_0000, 0b0111_0100),
+        (0b0011_1111, 0b0011_0100),
+        (0b0000_0000, 0b0011_0110),
+        (0b1100_1111, 0b1111_0100)
     ]
 
     override func setUpWithError() throws {

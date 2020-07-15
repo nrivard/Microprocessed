@@ -20,10 +20,15 @@ let package = Package(
             dependencies: []),
         .testTarget(
             name: "MicroprocessedTests",
+            dependencies: ["Microprocessed"]
+        ),
+        .testTarget(
+            name: "MicroprocessedE2ETests",
             dependencies: ["Microprocessed"],
             resources: [
-                .copy("ROM/6502_functional_test.bin"),
-                .copy("ROM/65C02_extended_opcodes_test.bin")
-            ]),
+                .copy("6502_functional_test.bin"),
+                .copy("65C02_extended_opcodes_test.bin")
+            ]
+        )
     ]
 )

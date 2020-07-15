@@ -4,7 +4,7 @@ import XCTest
 final class BBSTests: SystemTests {
 
     func testBBS() throws {
-        for (index, opcode) in Mnemonic.Opcodes.bbs.enumerated() {
+        for (index, opcode) in Mnemonic.Opcodes.bbs.sorted().enumerated() {
             let mask: UInt8 = 1 << index
 
             try runBranchTest(opcode: opcode, notTakenCondition: {
