@@ -1,45 +1,23 @@
 import XCTest
 @testable import Microprocessed
 
-final class ExtendedOpcodeTests: XCTestCase {
+final class ExtendedOpcodeTests: End2EndTest {
 
-    var ram: MemoryAddressable!
-    var mpu: Microprocessor!
-
-    var runQueue = DispatchQueue(label: "Microprocessor", qos: .userInteractive, attributes: [], autoreleaseFrequency: .workItem)
-
+    // TODO: i very much doubt this is the real success trap address...
     static let successTrapAddress: UInt16 = 0x3399
 
-    private let breakpoints: Set<UInt16> = [
-        0x072a
-    ]
+//    private let breakpoints: Set<UInt16> = [
+//        0x072a
+//    ]
 
-    enum Error: Swift.Error {
-        case missingBinaryResource
-        case infiniteLoopEncountered
-    }
-
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-
-        // next, read in the program from a file and write to ram
-        guard let path = Bundle.module.url(forResource: "65C02_extended_opcodes_test", withExtension: "bin") else {
-            throw Error.missingBinaryResource
-        }
-
-        let data = try Data(contentsOf: path)
-        let bytes: [UInt8] = .init(data)
-
-        self.ram = ROMMemory(rom: bytes)
-        self.mpu = Microprocessor(memoryLayout: ram)
-
-        try mpu.reset()
+    override var filePath: String {
+        return "65C02_extended_opcodes_test"
     }
 
     func testRunExtendedOpcodesTests() throws {
         let testExp = self.expectation(description: "Running Klaus extended opcode test suite")
 
-        runQueue.async { [self] in
+        runQueue.async { [unowned self] in
             // test requires PC be $0400
             mpu.registers.PC = 0x0400
             var shouldRun = true

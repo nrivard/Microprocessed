@@ -47,3 +47,15 @@ extension Microprocessor {
         return Microprocessor.stackPointerBase + UInt16(registers.SP)
     }
 }
+
+extension Microprocessor {
+
+    func dumpStack() throws {
+        for pointer in Microprocessor.stackPointerBase...(Microprocessor.stackPointerBase + 0xFF) {
+            let prefix = pointer == stackPointerAddress ? "-->" : "   "
+            let value = try memory.read(from: pointer)
+            let address = pointer % 0x08 == 0 ? pointer.hex : ""
+            print("\(prefix) [\(value.hex)]  \(address)")
+        }
+    }
+}

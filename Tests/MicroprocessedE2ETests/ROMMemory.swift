@@ -16,7 +16,11 @@ final class ROMMemory: MemoryAddressable {
     }
 
     func read(from address: UInt16) throws -> UInt8 {
-        return rom[Int(address)]
+        if address < rom.count {
+            return rom[Int(address)]
+        } else {
+            return 0xEA
+        }
     }
 
     func write(to address: UInt16, data: UInt8) throws {

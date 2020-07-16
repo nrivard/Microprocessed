@@ -17,11 +17,26 @@ public class Microprocessor {
         case undefinedInstruction
     }
 
+    /// defines the run mode the MPU is currently in
+    public enum RunMode {
+        /// normal run mode. clock ticks will fetch instructions and execute them
+        case normal
+
+        /// MPU is stopped but can be awoken by a hardware interrupt
+        case waitingForInterrupt
+
+        /// MPU is stopped. only a `reset` can get it moving again
+        case stopped
+    }
+
     /// Memory layout that the MPU uses to fetch opcodes and data alike
     public unowned let memory: MemoryAddressable
 
     /// raw register state
     public internal(set) var registers: Registers = .init()
+
+    /// CPU run mode state
+    public internal(set) var runMode: RunMode = .normal
 
     /// create a `Microprocessor` with a given memory layout and configuration.
     ///
@@ -39,10 +54,13 @@ public class Microprocessor {
         registers.Y = 0
         registers.SP = 0xFF
         registers.SR = StatusFlags.alwaysSet.rawValue
+        runMode = .normal
     }
 
     /// send a single clock rising edge pulse to the `Microprocessor`
     public func tick() throws {
+        guard runMode == .normal else { return }
+
         try execute(try fetch())
     }
 }
@@ -65,6 +83,8 @@ extension Microprocessor {
     }
 
     private func interrupt(toVector vector: UInt16, isHardware: Bool) throws {
+        guard runMode != .stopped else { return }
+
         // BRK instruction is actually supposed to push PC + 2, but it's addressing mode is `stack` which is size `1`. So if this is a software IRQ,
         // we need to compensate by adding 1 to PC
         let softwareOffset: UInt16 = isHardware ? 0 : 1
@@ -77,21 +97,6 @@ extension Microprocessor {
         registers.setInterruptsDisabled()
 
         registers.PC = try memory.readWord(fromAddressStartingAt: vector)
-    }
-}
-
-extension Microprocessor {
-
-    /// writes an opcode and 1-byte of data at the address pointed to by PC
-    public func writeOpcode(_ opcode: UInt8, data: UInt8) throws {
-        try memory.write(to: registers.PC, data: opcode)
-        try memory.write(to: registers.PC + 1, data: data)
-    }
-
-    /// writes an opcode and 2-bytes of data at the address pointed to by PC
-    public func writeOpcode(_ opcode: UInt8, word: UInt16) throws {
-        try memory.write(to: registers.PC, data: opcode)
-        try memory.write(toAddressStartingAt: registers.PC + 1, word: word)
     }
 }
 
@@ -429,6 +434,12 @@ extension Microprocessor {
 
         case .brk:
             try interrupt(toVector: Microprocessor.irqVector, isHardware: false)
+
+        case .wai:
+            runMode = .waitingForInterrupt
+
+        case .stp:
+            runMode = .stopped
 
         case .undefined:
             throw Error.undefinedInstruction

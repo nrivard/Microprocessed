@@ -67,6 +67,8 @@ extension Instruction {
 extension Instruction: CustomStringConvertible {
 
     public var description: String {
-        return String(format: "\(mnemonic) \(addressingMode)   ; \(opcode)")
+        let addressingModeString = addressingMode.description
+        let paddedAddressingMode = addressingModeString + String(repeating: " ", count: 10 - addressingModeString.count)
+        return String(format: "\(mnemonic) \(paddedAddressingMode)    ; opcode: \(opcode.hex(syntaxParadigm: .assembly))")
     }
 }

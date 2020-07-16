@@ -233,45 +233,33 @@ extension Instruction.AddressingMode: CustomStringConvertible {
         case .implied, .accumulator, .stack:
             return ""
         case .immediate(let value):
-            return "#\(value.hex)"
+            return "#\(value.hex(syntaxParadigm: .assembly))"
         case .zeroPage(let address):
-            return address.hex
+            return address.hex(syntaxParadigm: .assembly)
         case .zeroPageIndirect(let address):
-            return "(\(address.hex))"
+            return "(\(address.hex(syntaxParadigm: .assembly)))"
         case .zeroPageIndexed(let addr, let offset):
-            return "\(addr.hex),\(offset.hex)"
+            return "\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly))"
         case .zeroPageIndexedIndirect(let addr, offset: let offset):
-            return "(\(addr.hex),\(offset.hex))"
+            return "(\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly)))"
         case .zeroPageIndirectIndexed(let addr, offset: let offset):
-            return "(\(addr.hex)),\(offset.hex)"
+            return "(\(addr.hex(syntaxParadigm: .assembly))),\(offset.hex(syntaxParadigm: .assembly))"
         case .absolute(let addr):
-            return addr.hex
+            return addr.hex(syntaxParadigm: .assembly)
         case .absoluteIndirect(let addr):
-            return "(\(addr.hex))"
+            return "(\(addr.hex(syntaxParadigm: .assembly)))"
         case .absoluteIndexed(let addr, offset: let offset):
-            return "\(addr.hex),\(offset.hex)"
+            return "\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly))"
         case .absoluteIndexedIndirect(let addr, let offset):
-            return "(\(addr.hex),\(offset.hex))"
+            return "(\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly)))"
         case .relative(let offset):
-            return offset.hex
+            return offset.hex(syntaxParadigm: .assembly)
         case .zeroPageThenRelative(let zp, let relative):
-            return "\(zp.hex),\(relative.hex)"
+            return "\(zp.hex(syntaxParadigm: .assembly)),\(relative.hex(syntaxParadigm: .assembly))"
         }
     }
 }
 
 func ~=<Values: Sequence>(sequence: Values, value: Values.Element) -> Bool where Values.Element: Equatable {
     return sequence.contains(value)
-}
-
-//
-extension FixedWidthInteger {
-
-    public var hex: String {
-        return "0x" + String(self, radix: 16, uppercase: true)
-    }
-
-    var bin: String {
-        return "0b" + String(self, radix: 2, uppercase: true)
-    }
 }

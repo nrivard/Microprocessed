@@ -114,6 +114,8 @@ extension Instruction {
         // MARK: - Miscellaneous
         case nop
         case brk
+        case stp
+        case wai
 
         case undefined
 
@@ -275,6 +277,10 @@ extension Instruction {
                 self = .nop
             case Opcodes.brk:
                 self = .brk
+            case Opcodes.stp:
+                self = .stp
+            case Opcodes.wai:
+                self = .wai
 
             default:
                 self = .undefined
