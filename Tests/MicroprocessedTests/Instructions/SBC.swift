@@ -109,6 +109,40 @@ final class SBCTests: SystemTests {
             try mpu.execute(opcode, data: 0x0A)
         }
     }
+
+    func testSBCDecimal() throws {
+        let opcode: UInt8 = 0xE9
+        mpu.registers.setDecimal()
+
+        mpu.registers.setCarry()
+        mpu.registers.A = 0x0
+        try mpu.execute(opcode, data: 0x0)
+
+        XCTAssert(mpu.registers.A == 0)
+
+        mpu.registers.clearCarry()
+        try mpu.execute(opcode, data: 0x0)
+
+        XCTAssert(mpu.registers.A == 0x99)
+
+        mpu.registers.setCarry()
+        mpu.registers.A = 0x01
+        try mpu.execute(opcode, data: 0x01)
+
+        XCTAssert(mpu.registers.A == 0)
+
+        mpu.registers.A = 0x12
+        try mpu.execute(opcode, data: 0x21)
+
+        XCTAssert(mpu.registers.A == 0x91)
+        XCTAssert(!mpu.registers.$SR.contains(.didCarry))
+
+//        mpu.registers.A = 0x58
+//        try mpu.execute(opcode, data: 0x46)
+//
+//        XCTAssert(mpu.registers.A == 0x04)
+//        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+    }
 }
 
 extension SBCTests {

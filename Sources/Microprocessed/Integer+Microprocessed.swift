@@ -10,24 +10,11 @@ import Foundation
 extension UInt8 {
 
     var bcd: UInt8 {
-        var shift = 0
-        var digit = 0
-
-        var copy = self
-        var value: UInt8 = 0
-
-        while copy > 0 {
-            digit = Int(copy % 10)
-            value += UInt8(digit << shift)
-            shift += 4
-            copy /= 10
-        }
-
-        return value
+        return 0x10 * (self / 10) + (self % 10)
     }
 
     init(bcd: UInt8) {
-        self = 10 * (bcd >> 4) + (0x0F & bcd)
+        self = 0x0A * (bcd >> 4) + (bcd % 16);
     }
 }
 
@@ -66,14 +53,16 @@ public enum IntegerSyntaxParadigm {
 
 extension FixedWidthInteger {
 
+    public func rebase(fromRadix: Self, toRadix: Self) -> Self {
+        return self
+    }
+
     public var hex: String {
-        let hexString = String(self, radix: 16, uppercase: true)
-        let zerosPrefix = String(repeating: "0", count: (MemoryLayout<Self>.size * 2) - hexString.count)
-        return "0x\(zerosPrefix)\(hexString)"
+        return hex()
     }
 
     public var bin: String {
-        return "0b" + String(self, radix: 2, uppercase: true)
+        return bin()
     }
 
     public func hex(syntaxParadigm: IntegerSyntaxParadigm = .c) -> String {
@@ -82,5 +71,9 @@ extension FixedWidthInteger {
         return "\(syntaxParadigm.constantPrefix(radix: 16))\(zerosPrefix)\(hexString)"
     }
 
-//    public func
+    public func bin(syntaxParadigm: IntegerSyntaxParadigm = .c) -> String {
+        let binaryString = String(self, radix: 2)
+        let zerosPrefix = String(repeating: "0", count: (MemoryLayout<Self>.size * 8) - binaryString.count)
+        return "\(syntaxParadigm.constantPrefix(radix: 2))\(zerosPrefix)\(binaryString)"
+    }
 }

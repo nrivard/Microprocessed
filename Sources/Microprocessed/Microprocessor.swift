@@ -490,8 +490,8 @@ extension Microprocessor {
             result = [registers.A, value, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
             registers.updateCarry(for: result)
         } else {
-            var lowByte = (registers.A & 0x0F) + (value & 0x0F) + registers.arithmeticCarry
-            var highByte = (registers.A & 0xF0) + (value & 0x0F)
+            var lowByte = [registers.A & 0x0F, value & 0x0F, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+            var highByte = [registers.A & 0xF0, value & 0xF0].map(UInt16.init).reduce(0, +)
             var shouldCarry = false
 
             if lowByte >= 0x0A {
@@ -510,7 +510,7 @@ extension Microprocessor {
                 registers.clearCarry()
             }
 
-            result = UInt16(highByte << 4) | UInt16(lowByte)
+            result = highByte | (lowByte & 0x0F)
         }
 
         registers.updateSign(for: result)

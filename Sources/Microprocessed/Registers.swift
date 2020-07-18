@@ -127,26 +127,46 @@ extension Registers {
     }
 }
 
+extension Registers: CustomStringConvertible {
+
+    public var description: String {
+        return """
+            Registers:
+              A: \(A.hex)
+              X: \(X.hex)
+              Y: \(Y.hex)
+              SP: \(SP.hex)
+              SR: \(SR.bin)
+              PC: \(PC.hex)
+            """
+    }
+}
+
 /// Wraps the underlying value at the hardware level. This will always return `alwaysSet` and `isSoftwareInterrupt` as those
 /// can only be something else on the stack, never at the hardware level
 @propertyWrapper
 public struct HardwareStatusFlags: Equatable, Hashable {
 
     private var status: UInt8
+    private var flags: StatusFlags
 
     public var wrappedValue: UInt8 {
         get {
-            return status | StatusFlags.alwaysSet.rawValue | StatusFlags.isSoftwareInterrupt.rawValue
+            return status
         } set {
-            self.status = newValue
+            self.status = newValue | StatusFlags.alwaysSet.rawValue | StatusFlags.isSoftwareInterrupt.rawValue
+            self.flags = StatusFlags(rawValue: self.status)
         }
     }
 
     public var projectedValue: StatusFlags {
-        return StatusFlags(rawValue: wrappedValue)
+        return flags
     }
 
     public init(wrappedValue: UInt8) {
-        self.status = wrappedValue
+        let value = wrappedValue | StatusFlags.alwaysSet.rawValue | StatusFlags.isSoftwareInterrupt.rawValue
+
+        self.status = value
+        self.flags = StatusFlags(rawValue: value)
     }
 }

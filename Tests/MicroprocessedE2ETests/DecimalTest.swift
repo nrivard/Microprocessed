@@ -24,6 +24,7 @@ final class DecimalTest: End2EndTest {
                     try mpu.execute(instr)
 
                     instructions.append((pc.hex, instr))
+                    instructions = instructions.suffix(50)
                 } catch {
                     XCTAssert(false, "Encountered error: \(error) at PC: \(pc.hex)")
                 }
@@ -37,6 +38,6 @@ final class DecimalTest: End2EndTest {
             testExp.fulfill()
         }
 
-        waitForExpectations(timeout: 60)
+        waitForExpectations(timeout: 120)
     }
 }

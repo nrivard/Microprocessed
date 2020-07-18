@@ -47,3 +47,31 @@ extension MemoryAddressable {
         try write(to: highByteAddress, data: highByte)
     }
 }
+
+
+extension MemoryAddressable {
+
+    public func dump(range: ClosedRange<UInt16> = 0...0xFF, lineLimit: UInt16 = 8) throws {
+        let chunks = range.chunked(into: UInt16.Stride(lineLimit))
+
+        for chunk in chunks {
+            let line = try chunk.map { try read(from: $0).hex }.joined(separator: " ")
+            print(line)
+        }
+    }
+}
+
+extension ClosedRange where Bound: FixedWidthInteger {
+
+    public func chunked(into size: Bound.Stride) -> [[Bound]] {
+        var chunks: [[Bound]] = []
+
+        for lineStart in stride(from: lowerBound, to: upperBound, by: size) {
+            let lineEnd = lineStart + Bound(size)
+            let chunk = Array(lineStart..<lineEnd)
+            chunks.append(chunk)
+        }
+
+        return chunks
+    }
+}

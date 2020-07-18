@@ -8,7 +8,7 @@
 import Foundation
 
 /// semantic representation of the StatusFlags that can be easily queried
-public struct StatusFlags: OptionSet, Equatable {
+public struct StatusFlags: OptionSet, Hashable {
     public let rawValue: UInt8
 
     /// arithmetic operation resulted in a negative value

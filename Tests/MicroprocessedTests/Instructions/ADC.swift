@@ -109,6 +109,38 @@ final class ADCTests: SystemTests {
             try mpu.execute(opcode, data: 0x0A)
         }
     }
+
+    func testADCDecimal() throws {
+        let opcode: UInt8 = 0x69
+        mpu.registers.setDecimal()
+
+        mpu.registers.A = 0x0
+        try mpu.execute(opcode, data: 0x0)
+
+        XCTAssert(mpu.registers.A == 0)
+
+        mpu.registers.setCarry()
+        try mpu.execute(opcode, data: 0x0)
+
+        XCTAssert(mpu.registers.A == 1)
+
+        mpu.registers.clearCarry()
+        mpu.registers.A = 0x01
+        try mpu.execute(opcode, data: 0x01)
+
+        XCTAssert(mpu.registers.A == 2)
+
+        mpu.registers.A = 0x05
+        try mpu.execute(opcode, data: 0x05)
+
+        XCTAssert(mpu.registers.A == 0x10)
+
+        mpu.registers.A = 0x58
+        try mpu.execute(opcode, data: 0x46)
+
+        XCTAssert(mpu.registers.A == 0x04)
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+    }
 }
 
 extension ADCTests {

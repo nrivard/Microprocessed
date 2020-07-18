@@ -253,7 +253,7 @@ extension Instruction.AddressingMode: CustomStringConvertible {
         case .absoluteIndexedIndirect(let addr, let offset):
             return "(\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly)))"
         case .relative(let offset):
-            return offset.hex(syntaxParadigm: .assembly)
+            return "\(offset)"
         case .zeroPageThenRelative(let zp, let relative):
             return "\(zp.hex(syntaxParadigm: .assembly)),\(relative.hex(syntaxParadigm: .assembly))"
         }
