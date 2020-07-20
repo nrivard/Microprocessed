@@ -350,7 +350,12 @@ extension Microprocessor {
                 // a 1's complement operand. with carry this will become 2's complement
                 value = ~byte
             }
+            let oldA = registers.A
             arithmeticAdd(value)
+            print(instruction)
+            print("\(oldA.hex) - \(byte.hex) = \(registers.A.hex)")
+            print("\(oldA.hex) + \(value.hex) = \(registers.A.hex)")
+            print("\(registers)")
 
         case .jmp:
             registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)

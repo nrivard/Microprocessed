@@ -24,7 +24,7 @@ final class DecimalTest: End2EndTest {
                     try mpu.execute(instr)
 
                     instructions.append((pc.hex, instr))
-                    instructions = instructions.suffix(50)
+                    instructions = instructions.suffix(100)
                 } catch {
                     XCTAssert(false, "Encountered error: \(error) at PC: \(pc.hex)")
                 }
@@ -35,6 +35,9 @@ final class DecimalTest: End2EndTest {
             // check for success
             let error = try! ram.read(from: 0x0B)
             XCTAssert(error == 0, "Encountered an error\n\(instructions.reduce("", { $0 + "\n\($1)" }))")
+            if error == 1 {
+                try! ram.dump(range: 0...0x17)
+            }
             testExp.fulfill()
         }
 

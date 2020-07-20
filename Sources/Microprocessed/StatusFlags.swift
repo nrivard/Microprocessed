@@ -43,3 +43,19 @@ public struct StatusFlags: OptionSet, Hashable {
         self.rawValue = rawValue
     }
 }
+
+extension StatusFlags: CustomStringConvertible {
+
+    public var description: String {
+        var description = ""
+        description += contains(.isNegative) ? "N" : "-"
+        description += contains(.didOverflow) ? "V" : "-"
+        description += "-" // always set
+        description += contains(.isSoftwareInterrupt) ? "B" : "-" // in the end this should also always be set
+        description += contains(.decimalMode) ? "D" : "-"
+        description += contains(.interruptsDisabled) ? "I" : "-"
+        description += contains(.isZero) ? "Z" : "-"
+        description += contains(.didCarry) ? "C" : "-"
+        return description
+    }
+}

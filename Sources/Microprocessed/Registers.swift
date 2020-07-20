@@ -136,7 +136,7 @@ extension Registers: CustomStringConvertible {
               X: \(X.hex)
               Y: \(Y.hex)
               SP: \(SP.hex)
-              SR: \(SR.bin)
+              SR: \(_SR) (\(SR.hex))
               PC: \(PC.hex)
             """
     }
@@ -168,5 +168,12 @@ public struct HardwareStatusFlags: Equatable, Hashable {
 
         self.status = value
         self.flags = StatusFlags(rawValue: value)
+    }
+}
+
+extension HardwareStatusFlags: CustomStringConvertible {
+
+    public var description: String {
+        return flags.description
     }
 }
