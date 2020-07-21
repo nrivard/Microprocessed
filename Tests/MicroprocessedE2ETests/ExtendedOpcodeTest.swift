@@ -11,7 +11,7 @@ final class ExtendedOpcodeTests: End2EndTest {
 //    ]
 
     override var filePath: String {
-        return "65C02_extended_opcodes_test"
+        return "Binaries/65C02_extended_opcodes_test"
     }
 
     func testRunExtendedOpcodesTests() throws {

@@ -26,9 +26,8 @@ let package = Package(
             name: "MicroprocessedE2ETests",
             dependencies: ["Microprocessed"],
             resources: [
-                .copy("6502_functional_test.bin"),
-                .copy("65C02_extended_opcodes_test.bin"),
-                .copy("65C02_decimal_test.bin")
+                .copy("Binaries"),
+                .copy("Assembly")
             ]
         )
     ]

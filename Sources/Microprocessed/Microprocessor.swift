@@ -350,12 +350,13 @@ extension Microprocessor {
                 // a 1's complement operand. with carry this will become 2's complement
                 value = ~byte
             }
-            let oldA = registers.A
+//            let oldA = registers.A
             arithmeticAdd(value)
-            print(instruction)
-            print("\(oldA.hex) - \(byte.hex) = \(registers.A.hex)")
-            print("\(oldA.hex) + \(value.hex) = \(registers.A.hex)")
-            print("\(registers)")
+//            print(instruction)
+//            print("\(oldA.hex) - \(byte.hex) = \(registers.A.hex)")
+//            print("\(oldA.hex) + \(value.hex) = \(registers.A.hex)")
+//            print("\(registers)")
+//            print("")
 
         case .jmp:
             registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
@@ -493,6 +494,7 @@ extension Microprocessor {
         
         if !registers.$SR.contains(.decimalMode) {
             result = [registers.A, value, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+
             registers.updateCarry(for: result)
         } else {
             var lowByte = [registers.A & 0x0F, value & 0x0F, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
@@ -516,6 +518,13 @@ extension Microprocessor {
             }
 
             result = highByte | (lowByte & 0x0F)
+
+//            if -128...127 ~= Int16(bitPattern: result) {
+//                registers.clearOverflow()
+//            } else {
+//                registers.setOverflow()
+//            }
+
         }
 
         registers.updateSign(for: result)

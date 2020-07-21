@@ -6,7 +6,7 @@ final class FunctionalTests: End2EndTest {
     static let successTrapAddress: UInt16 = 0x3399
 
     override var filePath: String {
-        return "6502_functional_test"
+        return "Binaries/6502_functional_test"
     }
 
 //    private let breakpoints: Set<UInt16> = [

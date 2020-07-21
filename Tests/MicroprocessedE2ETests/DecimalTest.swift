@@ -4,7 +4,7 @@ import XCTest
 final class DecimalTest: End2EndTest {
 
     override var filePath: String {
-        return "65C02_decimal_test"
+        return "Binaries/65C02_decimal_test"
     }
 
     func testRunDecimalTests() throws {
@@ -24,7 +24,7 @@ final class DecimalTest: End2EndTest {
                     try mpu.execute(instr)
 
                     instructions.append((pc.hex, instr))
-                    instructions = instructions.suffix(100)
+                    instructions = instructions.suffix(50)
                 } catch {
                     XCTAssert(false, "Encountered error: \(error) at PC: \(pc.hex)")
                 }
