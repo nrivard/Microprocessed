@@ -479,14 +479,17 @@ extension Microprocessor {
     }
 
     private func arithmeticOperation(_ value: UInt8, operation: ArithmeticOperation = .add) {
-        let byte: UInt8
+//        let oldA = registers.A
+//        let carry = operation == .add ? "\(registers.arithmeticCarry)" : "\(1 - registers.arithmeticCarry)"
+
+        let byte = operation == .add ? value : (registers.$SR.contains(.decimalMode) ? 0x99 &- value : ~value)
         let result: UInt16
 
         if !registers.$SR.contains(.decimalMode) {
-            byte = operation == .add ? value : ~value
             result = [registers.A, byte, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+
+            registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
         } else {
-            byte = operation == .add ? value : 0x99 &- value
             var lowNibble = [registers.A & 0x0F, byte & 0x0F, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
             var highNibble = [registers.A & 0xF0, byte & 0xF0].map(UInt16.init).reduce(0, +)
 
@@ -505,11 +508,14 @@ extension Microprocessor {
         registers.updateSign(for: result)
         registers.updateZero(for: result)
         registers.updateCarry(for: result)
-
-        // TODO: this is not universal and fails for decimal mode
-        registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
+        registers.updateOverflow(for: result, leftOperand: byte, rightOperand: registers.A)
 
         registers.A = result.truncated
+
+//        if registers.$SR.contains(.decimalMode) {
+//            let op = "\(operation == .add ? "+" : "-")"
+//            print("\(oldA.hex) \(op) \(value.hex) \(op) \(carry) = \(registers.A.hex), SR: \(registers.SR.bin)")
+//        }
     }
 
     private func branch(on condition: @autoclosure () throws -> Bool, addressingMode: Instruction.AddressingMode) throws {

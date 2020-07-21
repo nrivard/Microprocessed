@@ -1,0 +1,3 @@
+{
+    "retroassembler.path": "dotnet /usr/local/lib/retroassembler/retroassembler.dll"
+}

@@ -14,17 +14,13 @@ final class DecimalTest: End2EndTest {
             // test requires PC be $0200
             mpu.registers.PC = 0x0200
             var shouldRun = true
-            var instructions: [(String, Instruction)] = []
+            var pc: UInt16 = 0
 
             while shouldRun {
-                let pc = mpu.registers.PC
+                pc = mpu.registers.PC
 
                 do {
-                    let instr = try mpu.fetch()
-                    try mpu.execute(instr)
-
-//                    instructions.append((pc.hex, instr))
-//                    instructions = instructions.suffix(50)
+                    try mpu.tick()
                 } catch {
                     XCTAssert(false, "Encountered error: \(error) at PC: \(pc.hex)")
                 }
@@ -34,10 +30,7 @@ final class DecimalTest: End2EndTest {
 
             // check for success
             let error = try! ram.read(from: 0x0B)
-            XCTAssert(error == 0, "Encountered an error\n\(instructions.reduce("", { $0 + "\n\($1)" }))")
-            if error == 1 {
-                try! ram.dump(range: 0...0x17)
-            }
+            XCTAssert(error == 0, "Encountered an error at \(pc.hex)")
             testExp.fulfill()
         }
 

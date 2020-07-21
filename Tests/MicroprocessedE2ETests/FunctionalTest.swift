@@ -3,16 +3,11 @@ import XCTest
 
 final class FunctionalTests: End2EndTest {
 
-    static let successTrapAddress: UInt16 = 0x3399
+    static let successTrapAddress: UInt16 = 0x3469
 
     override var filePath: String {
         return "Binaries/6502_functional_test"
     }
-
-//    private let breakpoints: Set<UInt16> = [
-//        successTrapAddress,
-//        0x335F
-//    ]
 
     func testRunFunctionalTests() throws {
         let testExp = self.expectation(description: "Running Klaus functional test suite")

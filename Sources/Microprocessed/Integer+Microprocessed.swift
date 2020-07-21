@@ -7,17 +7,6 @@
 
 import Foundation
 
-extension UInt8 {
-
-    var bcd: UInt8 {
-        return 0x10 * (self / 10) + (self % 10)
-    }
-
-    init(bcd: UInt8) {
-        self = 0x0A * (bcd >> 4) + (bcd % 16);
-    }
-}
-
 extension UInt16 {
 
     var truncated: UInt8 {

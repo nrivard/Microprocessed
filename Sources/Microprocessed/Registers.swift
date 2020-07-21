@@ -57,7 +57,7 @@ extension Registers {
 
     /// lifted from Mike Chamber's MoarNES and mathematically validated via http://www.righto.com/2012/12/the-6502-overflow-flag-explained.html
     mutating func updateOverflow(for result: UInt16, leftOperand: UInt8, rightOperand: UInt8) {
-        if (result ^ UInt16(leftOperand)) & (result ^ UInt16(rightOperand)) & 0x0080 > 0 {
+        if ((result ^ UInt16(leftOperand)) & (result ^ UInt16(rightOperand)) & 0x0080) > 0 {
             setOverflow()
         } else {
             clearOverflow()
