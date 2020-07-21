@@ -140,6 +140,12 @@ final class ADCTests: SystemTests {
 
         XCTAssert(mpu.registers.A == 0x04)
         XCTAssert(mpu.registers.$SR.contains(.didCarry))
+
+        mpu.registers.setCarry()
+        mpu.registers.A = 0x06
+        try mpu.execute(opcode, data: 0x09)
+
+        XCTAssert(mpu.registers.A == 0x16)
     }
 }
 

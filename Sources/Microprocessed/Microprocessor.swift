@@ -338,25 +338,11 @@ extension Microprocessor {
 
         case .adc:
             let value = try instruction.addressingMode.value(from: memory, registers: registers)
-            arithmeticAdd(value)
+            arithmeticOperation(value, operation: .add)
 
         case .sbc:
-            let value: UInt8
-            let byte = try instruction.addressingMode.value(from: memory, registers: registers)
-            if registers.$SR.contains(.decimalMode) {
-                // a 10's complement operand
-                value = 0x99 &- byte
-            } else {
-                // a 1's complement operand. with carry this will become 2's complement
-                value = ~byte
-            }
-//            let oldA = registers.A
-            arithmeticAdd(value)
-//            print(instruction)
-//            print("\(oldA.hex) - \(byte.hex) = \(registers.A.hex)")
-//            print("\(oldA.hex) + \(value.hex) = \(registers.A.hex)")
-//            print("\(registers)")
-//            print("")
+            let value = try instruction.addressingMode.value(from: memory, registers: registers)
+            arithmeticOperation(value, operation: .sub)
 
         case .jmp:
             registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
@@ -485,55 +471,45 @@ extension Microprocessor {
         } else {
             registers.clearCarry()
         }
-
-//        print("Comparing \(register.hex) - \(value.hex) = \(result.hex)")
     }
 
-    private func arithmeticAdd(_ value: UInt8) {
+    private enum ArithmeticOperation {
+        case add
+        case sub
+    }
+
+    private func arithmeticOperation(_ value: UInt8, operation: ArithmeticOperation = .add) {
+        let byte: UInt8
         let result: UInt16
-        
+
         if !registers.$SR.contains(.decimalMode) {
-            result = [registers.A, value, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
-
-            registers.updateCarry(for: result)
+            byte = operation == .add ? value : ~value
+            result = [registers.A, byte, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
         } else {
-            var lowByte = [registers.A & 0x0F, value & 0x0F, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
-            var highByte = [registers.A & 0xF0, value & 0xF0].map(UInt16.init).reduce(0, +)
-            var shouldCarry = false
+            byte = operation == .add ? value : 0x99 &- value
+            var lowNibble = [registers.A & 0x0F, byte & 0x0F, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+            var highNibble = [registers.A & 0xF0, byte & 0xF0].map(UInt16.init).reduce(0, +)
 
-            if lowByte >= 0x0A {
-                lowByte -= 0x0A
-                highByte += 0x10
+            if lowNibble >= 0x0A {
+                lowNibble = (lowNibble &+ 0x06) & 0x0F
+                highNibble = highNibble &+ 0x10
             }
 
-            if highByte >= 0xA0 {
-                highByte -= 0xA0
-                shouldCarry = true
+            if highNibble >= 0xA0 {
+                highNibble = highNibble &+ 0x60
             }
 
-            if shouldCarry {
-                registers.setCarry()
-            } else {
-                registers.clearCarry()
-            }
-
-            result = highByte | (lowByte & 0x0F)
-
-//            if -128...127 ~= Int16(bitPattern: result) {
-//                registers.clearOverflow()
-//            } else {
-//                registers.setOverflow()
-//            }
-
+            result = highNibble | (lowNibble & 0x0F)
         }
 
         registers.updateSign(for: result)
         registers.updateZero(for: result)
+        registers.updateCarry(for: result)
+
+        // TODO: this is not universal and fails for decimal mode
         registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
 
         registers.A = result.truncated
-
-//        print("Adding \(registers.A.hex) + \(value.hex) = \(registers.A.hex), SR: \(registers.SR.bin)")
     }
 
     private func branch(on condition: @autoclosure () throws -> Bool, addressingMode: Instruction.AddressingMode) throws {

@@ -131,17 +131,19 @@ final class SBCTests: SystemTests {
 
         XCTAssert(mpu.registers.A == 0)
 
+        mpu.registers.setCarry()
         mpu.registers.A = 0x12
         try mpu.execute(opcode, data: 0x21)
 
         XCTAssert(mpu.registers.A == 0x91)
         XCTAssert(!mpu.registers.$SR.contains(.didCarry))
 
-//        mpu.registers.A = 0x58
-//        try mpu.execute(opcode, data: 0x46)
-//
-//        XCTAssert(mpu.registers.A == 0x04)
-//        XCTAssert(mpu.registers.$SR.contains(.didCarry))
+        mpu.registers.setCarry()
+        mpu.registers.A = 0x06
+        try mpu.execute(opcode, data: 0x00)
+
+        XCTAssert(mpu.registers.A == 0x06)
+        XCTAssert(mpu.registers.$SR.contains(.didCarry))
     }
 }
 

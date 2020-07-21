@@ -23,8 +23,8 @@ final class DecimalTest: End2EndTest {
                     let instr = try mpu.fetch()
                     try mpu.execute(instr)
 
-                    instructions.append((pc.hex, instr))
-                    instructions = instructions.suffix(50)
+//                    instructions.append((pc.hex, instr))
+//                    instructions = instructions.suffix(50)
                 } catch {
                     XCTAssert(false, "Encountered error: \(error) at PC: \(pc.hex)")
                 }
