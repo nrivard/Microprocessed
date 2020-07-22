@@ -49,7 +49,7 @@ final class ExtendedOpcodeTests: End2EndTest {
                 }
 
                 if mpu.registers.PC == pc {
-                    XCTAssert(pc == FunctionalTests.successTrapAddress, "Failure found at \(pc.hex)\nExecuted (NEW) \(instrCount) instructions")
+                    XCTAssert(pc == FunctionalTests.successTrapAddress, "Failure found at \(pc.hex)\nExecuted \(instrCount) instructions")
                     testExp.fulfill()
                     shouldRun = false
                 }

@@ -20,14 +20,16 @@ final class AddressingModeTests: SystemTests {
             Opcodes.implied,
             Opcodes.immediate,
             Opcodes.stack,
-            Opcodes.unused,
             Opcodes.zeroPage,
             Opcodes.zeroPageIndexedIndirect,
             Opcodes.zeroPageIndexedX,
             Opcodes.zeroPageIndexedY,
             Opcodes.zeroPageIndirect,
             Opcodes.zeroPageIndirectIndexed,
-            Opcodes.zeroPageThenRelative
+            Opcodes.zeroPageThenRelative,
+            Opcodes.unused1,
+            Opcodes.unused2,
+            Opcodes.unused3
         ].flatMap { $0 }
 
         let allOpcodesSet = Set(allOpcodes)

@@ -13,7 +13,7 @@ final class MicroprocessorTests: SystemTests {
     }
 
     func testUndefinedInstruction() throws {
-        for opcode in Instruction.AddressingMode.Opcodes.unused {
+        for opcode in Instruction.AddressingMode.Opcodes.unused1 {
             XCTAssertThrowsError(try mpu.execute(opcode, data: 0x00))
         }
     }

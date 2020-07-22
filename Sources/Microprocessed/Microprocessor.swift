@@ -53,7 +53,7 @@ public class Microprocessor {
         registers.X = 0
         registers.Y = 0
         registers.SP = 0xFF
-        registers.SR = StatusFlags.alwaysSet.rawValue
+        registers.SR = 0 // this will actually properly set `Always` and `Break`
         runMode = .normal
     }
 
