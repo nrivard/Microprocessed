@@ -117,6 +117,7 @@ extension Instruction {
         case stp
         case wai
 
+        case unused
         case undefined
 
         init(_ opcode: UInt8) {
@@ -281,6 +282,9 @@ extension Instruction {
                 self = .stp
             case Opcodes.wai:
                 self = .wai
+
+            case Opcodes.unused:
+                self = .unused
 
             default:
                 self = .undefined

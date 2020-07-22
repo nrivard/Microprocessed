@@ -13,9 +13,28 @@ final class MicroprocessorTests: SystemTests {
     }
 
     func testUndefinedInstruction() throws {
-        for opcode in Instruction.AddressingMode.Opcodes.unused1 {
+        // first test that we'll throw if config is default
+        for opcode in Instruction.Mnemonic.Opcodes.unused {
             XCTAssertThrowsError(try mpu.execute(opcode, data: 0x00))
         }
+
+        // now test that if we change the configuration, we should just get a NOP
+        let unrestrainedMPU = Microprocessor(memoryLayout: ram, configuration: .init(warnOnUnusedOpcodes: false))
+        let unused1 = Instruction.AddressingMode.Opcodes.unused1.first!
+        let unused2 = Instruction.AddressingMode.Opcodes.unused2.first!
+        let unused3 = Instruction.AddressingMode.Opcodes.unused3.first!
+
+        var pc = unrestrainedMPU.registers.PC
+        try unrestrainedMPU.execute(unused1)
+        XCTAssert(unrestrainedMPU.registers.PC == pc + 1)
+
+        pc = unrestrainedMPU.registers.PC
+        try unrestrainedMPU.execute(unused2)
+        XCTAssert(unrestrainedMPU.registers.PC == pc + 2)
+
+        pc = unrestrainedMPU.registers.PC
+        try unrestrainedMPU.execute(unused3)
+        XCTAssert(unrestrainedMPU.registers.PC == pc + 3)
     }
 
     func testLoadStatusFlags() throws {

@@ -437,6 +437,12 @@ extension Microprocessor {
         case .stp:
             runMode = .stopped
 
+        case .unused:
+            // if we are warning on unused opcodes, fallthrough to error. otherwise, this is a NOP
+            if configuration.warnOnUnusedOpcodes {
+                fallthrough
+            }
+
         case .undefined:
             throw Error.undefinedInstruction
         }
