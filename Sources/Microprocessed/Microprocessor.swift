@@ -32,6 +32,9 @@ public class Microprocessor {
     /// Memory layout that the MPU uses to fetch opcodes and data alike
     public unowned let memory: MemoryAddressable
 
+    /// Allows customization of the MPU, especially for learning purposes. By default, unused opcodes throw errors
+    public let configuration: Configuration
+
     /// raw register state
     public internal(set) var registers: Registers = .init()
 
@@ -42,8 +45,9 @@ public class Microprocessor {
     ///
     /// NOTE: `memoryLayout` is `unowned`, so it is the creator's responsibility to keep
     /// both the created `Microprocessor` and `memoryLayout` strongly referenced
-    public required init(memoryLayout memory: MemoryAddressable) {
+    public required init(memoryLayout memory: MemoryAddressable, configuration: Configuration = .init()) {
         self.memory = memory
+        self.configuration = configuration
     }
 
     /// reset the `Microprocessor` register state and load `PC` at the `resetVector` address
