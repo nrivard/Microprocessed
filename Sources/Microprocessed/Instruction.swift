@@ -17,11 +17,11 @@ public struct Instruction {
     /// the memory span of the instruction
     public var size: UInt16 {
         switch addressingMode {
-        case .implied, .stack, .accumulator:
+        case .implied, .stack, .accumulator, .unused1:
             return 1
-        case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed:
+        case .immediate, .zeroPage, .relative, .zeroPageIndexed, .zeroPageIndirect, .zeroPageIndexedIndirect, .zeroPageIndirectIndexed, .unused2:
             return 2
-        case .absolute, .absoluteIndexed, .absoluteIndirect, .absoluteIndexedIndirect, .zeroPageThenRelative:
+        case .absolute, .absoluteIndexed, .absoluteIndirect, .absoluteIndexedIndirect, .zeroPageThenRelative, .unused3:
             return 3
         }
     }

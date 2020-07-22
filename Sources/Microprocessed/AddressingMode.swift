@@ -37,6 +37,11 @@ extension Instruction {
         /// then, it will return relative address for `.address(::)`
         case zeroPageThenRelative(zeroPage: UInt8, relative: Int8)
 
+        /// these are unused opcodes, bucketed by byte size
+        case unused1
+        case unused2
+        case unused3
+
         public init(_ opcode: UInt8, memory: MemoryAddressable, registers: Registers) throws {
             typealias Opcodes = Instruction.AddressingMode.Opcodes
 
@@ -114,6 +119,13 @@ extension Instruction {
                 let relative = try memory.read(from: registers.PC + 2)
                 self = .zeroPageThenRelative(zeroPage: zeroPage, relative: Int8(bitPattern: relative))
 
+            case Instruction.AddressingMode.Opcodes.unused1:
+                self = .unused1
+            case Instruction.AddressingMode.Opcodes.unused2:
+                self = .unused2
+            case Instruction.AddressingMode.Opcodes.unused3:
+                self = .unused3
+
             default:
                 throw Instruction.AddressingMode.Error.unknown
             }
@@ -138,7 +150,7 @@ extension Instruction.AddressingMode {
         case .zeroPageThenRelative(let addr, _):
             return try memory.read(from: UInt16(addr))
 
-        case .implied, .stack, .relative, .absoluteIndirect, .absoluteIndexedIndirect:
+        case .implied, .stack, .relative, .absoluteIndirect, .absoluteIndexedIndirect, .unused1, .unused2, .unused3:
             throw Error.noAssociatedValue
         }
     }
@@ -181,7 +193,7 @@ extension Instruction.AddressingMode {
         case .absoluteIndexedIndirect(let addr, let offset):
             return try memory.readWord(fromAddressStartingAt: addr + UInt16(offset))
             
-        case .immediate, .implied, .accumulator, .stack:
+        case .immediate, .implied, .accumulator, .stack, .unused1, .unused2, .unused3:
             throw Error.noResolvedAddress
         }
     }
@@ -217,7 +229,10 @@ extension Instruction.AddressingMode: Equatable, Hashable {
 
         case (.implied, .implied),
              (.stack, .stack),
-             (.accumulator, .accumulator):
+             (.accumulator, .accumulator),
+             (.unused1, .unused1),
+             (.unused2, .unused2),
+             (.unused3, .unused3):
             return true
 
         default:
@@ -230,7 +245,7 @@ extension Instruction.AddressingMode: CustomStringConvertible {
 
     public var description: String {
         switch self {
-        case .implied, .accumulator, .stack:
+        case .implied, .accumulator, .stack, .unused1, .unused2, .unused3:
             return ""
         case .immediate(let value):
             return "#\(value.hex(syntaxParadigm: .assembly))"
