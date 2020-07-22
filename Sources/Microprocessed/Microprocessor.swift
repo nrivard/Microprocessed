@@ -100,6 +100,9 @@ extension Microprocessor {
         // while in an interrupt routine, interrupts are disabled. this will get cleared (if it was previously cleared) when SR is restored
         registers.setInterruptsDisabled()
 
+        // the 65C02 also clears the decimal mode flag
+        registers.clearDecimal()
+
         registers.PC = try memory.readWord(fromAddressStartingAt: vector)
     }
 }
@@ -317,16 +320,12 @@ extension Microprocessor {
             try compare(registers.Y, addressingMode: instruction.addressingMode)
 
         case .trb:
-            let result = UInt16(~registers.A & (try instruction.addressingMode.value(from: memory, registers: registers)))
-            registers.updateZero(for: result)
-
-            try save(result, addressingMode: instruction.addressingMode)
+            let value = try instruction.addressingMode.value(from: memory, registers: registers)
+            try testBits(using: value, saving: { ~$0 & $1 }, addressingMode: instruction.addressingMode)
 
         case .tsb:
-            let result = UInt16(registers.A | (try instruction.addressingMode.value(from: memory, registers: registers)))
-            registers.updateZero(for: result)
-
-            try save(result, addressingMode: instruction.addressingMode)
+            let value = try instruction.addressingMode.value(from: memory, registers: registers)
+            try testBits(using: value, saving: |, addressingMode: instruction.addressingMode)
 
         case .rmb:
             let mask = ~instruction.resetOpcodeBitMask
@@ -489,9 +488,6 @@ extension Microprocessor {
     }
 
     private func arithmeticOperation(_ value: UInt8, operation: ArithmeticOperation = .add) {
-//        let oldA = registers.A
-//        let carry = operation == .add ? "\(registers.arithmeticCarry)" : "\(1 - registers.arithmeticCarry)"
-
         let byte = operation == .add ? value : (registers.$SR.contains(.decimalMode) ? 0x99 &- value : ~value)
         let result: UInt16
 
@@ -521,11 +517,16 @@ extension Microprocessor {
         registers.updateOverflow(for: result, leftOperand: byte, rightOperand: registers.A)
 
         registers.A = result.truncated
+    }
 
-//        if registers.$SR.contains(.decimalMode) {
-//            let op = "\(operation == .add ? "+" : "-")"
-//            print("\(oldA.hex) \(op) \(value.hex) \(op) \(carry) = \(registers.A.hex), SR: \(registers.SR.bin)")
-//        }
+    /// tests for equality via mask & accum. `saving` should return the value that should be saved to the location
+    /// in `addressingMode`
+    private func testBits(using mask: UInt8, saving: (_ accum: UInt8, _ value: UInt8) -> UInt8, addressingMode: Instruction.AddressingMode) throws {
+        let result = UInt16(saving(registers.A, mask))
+        let zeroResult = registers.A & mask
+        registers.updateZero(for: UInt16(zeroResult))
+
+        try save(result, addressingMode: addressingMode)
     }
 
     private func branch(on condition: @autoclosure () throws -> Bool, addressingMode: Instruction.AddressingMode) throws {

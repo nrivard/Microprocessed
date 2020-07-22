@@ -3,12 +3,7 @@ import XCTest
 
 final class ExtendedOpcodeTests: End2EndTest {
 
-    // TODO: i very much doubt this is the real success trap address...
-    static let successTrapAddress: UInt16 = 0x3399
-
-//    private let breakpoints: Set<UInt16> = [
-//        0x072a
-//    ]
+    static let successTrapAddress: UInt16 = 0x24F1
 
     override var filePath: String {
         return "Binaries/65C02_extended_opcodes_test"
@@ -22,34 +17,20 @@ final class ExtendedOpcodeTests: End2EndTest {
             mpu.registers.PC = 0x0400
             var shouldRun = true
 
-            /// the last 50 memory addresses and the instruction run there
-            var instructions: [(UInt16, Instruction)] = []
             var instrCount = 0
 
             while shouldRun {
                 let pc = mpu.registers.PC
 
                 do {
-                    let instr = try mpu.fetch()
-
-                    if breakpoints.contains(pc) {
-                        switch pc {
-                        default:
-                            break
-                        }
-                    }
-
-                    instructions.append((pc, instr))
-                    instructions = instructions.suffix(50)
-
-                    try mpu.execute(instr)
+                    try mpu.tick()
                     instrCount += 1
                 } catch {
                     XCTAssert(false, "Encountered error: \(error)")
                 }
 
                 if mpu.registers.PC == pc {
-                    XCTAssert(pc == FunctionalTests.successTrapAddress, "Failure found at \(pc.hex)\nExecuted \(instrCount) instructions")
+                    XCTAssert(pc == ExtendedOpcodeTests.successTrapAddress, "Failure found at \(pc.hex)\nExecuted \(instrCount) instructions")
                     testExp.fulfill()
                     shouldRun = false
                 }

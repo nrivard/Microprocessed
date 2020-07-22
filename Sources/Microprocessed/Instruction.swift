@@ -26,23 +26,12 @@ public struct Instruction {
         }
     }
 
-    /// the number of rising edge clock ticks this instruction would have taken on a real MPU
-//    public var ticks: UInt8 {
-//        return 2 // TODO: need to figure this out!
-//    }
-
     /// creates an instruction from memory with given register state.
     init(memory: MemoryAddressable, registers: Registers) throws {
         self.opcode = try memory.read(from: registers.PC)
         self.mnemonic = .init(opcode)
         self.addressingMode = try .init(opcode, memory: memory, registers: registers)
     }
-
-//    /// create a hardcoded instruction. potentially useful for testing
-//    init(opcode: UInt8, addressingMode: AddressingMode) {
-//        self.opcode = opcode
-//        self.addressingMode = addressingMode
-//    }
 }
 
 extension Instruction {
@@ -69,6 +58,6 @@ extension Instruction: CustomStringConvertible {
     public var description: String {
         let addressingModeString = addressingMode.description
         let paddedAddressingMode = addressingModeString + String(repeating: " ", count: 10 - addressingModeString.count)
-        return String(format: "\(mnemonic) \(paddedAddressingMode)    ; opcode: \(opcode.hex(syntaxParadigm: .assembly))")
+        return String(format: "\(mnemonic.rawValue.uppercased()) \(paddedAddressingMode)    ; opcode: \(opcode.hex(syntaxParadigm: .assembly))")
     }
 }

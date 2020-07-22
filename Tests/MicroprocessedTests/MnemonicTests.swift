@@ -76,6 +76,7 @@ final class MnemonicTests: XCTestCase {
             Mnemonic.Opcodes.txa,
             Mnemonic.Opcodes.tya,
             Mnemonic.Opcodes.nop,
+            Mnemonic.Opcodes.unused,
         ].flatMap { $0 }
 
         let dupes: [UInt8: Int] = allOpcodes.reduce([:]) { seenOpcodes, opcode in
@@ -126,6 +127,6 @@ final class MnemonicTests: XCTestCase {
     }
 
     func testUndefined() {
-        XCTAssert(Mnemonic(0x02) ~= .undefined)
+        XCTAssert(Mnemonic(0x02) ~= .unused)
     }
 }

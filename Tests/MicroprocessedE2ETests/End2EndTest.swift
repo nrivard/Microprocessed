@@ -32,7 +32,7 @@ class End2EndTest: XCTestCase {
         let bytes: [UInt8] = .init(data)
 
         self.ram = ROMMemory(rom: bytes)
-        self.mpu = Microprocessor(memoryLayout: ram)
+        self.mpu = Microprocessor(memoryLayout: ram, configuration: .init(warnOnUnusedOpcodes: false))
 
         try mpu.reset()
     }
