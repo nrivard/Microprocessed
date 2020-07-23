@@ -27,6 +27,8 @@ public struct Registers: Equatable, Hashable {
     
     /// Program counter
     public var PC: UInt16 = 0
+
+    public init() {}
 }
 
 extension Registers {

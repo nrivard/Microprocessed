@@ -10,7 +10,7 @@ import Foundation
 extension Microprocessor {
 
     public struct Configuration {
-        let warnOnUnusedOpcodes: Bool
+        var warnOnUnusedOpcodes: Bool
 
         public init(warnOnUnusedOpcodes: Bool = true) {
             self.warnOnUnusedOpcodes = warnOnUnusedOpcodes
