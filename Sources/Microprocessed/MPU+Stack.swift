@@ -10,6 +10,11 @@ import Foundation
 extension Microprocessor {
 
     public static let stackPointerBase: UInt16 = 0x0100
+    public static let stackPointerEnd: UInt16 = 0x01FF
+
+    public var stackPointerAddress: UInt16 {
+        return Microprocessor.stackPointerBase + UInt16(registers.SP)
+    }
 
     func pop() throws -> UInt8 {
         registers.SP = registers.SP &+ 1
@@ -38,13 +43,6 @@ extension Microprocessor {
 
         try push(highByte)
         try push(lowByte)
-    }
-}
-
-extension Microprocessor {
-
-    var stackPointerAddress: UInt16 {
-        return Microprocessor.stackPointerBase + UInt16(registers.SP)
     }
 }
 
