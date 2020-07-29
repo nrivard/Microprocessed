@@ -9,6 +9,6 @@ final class TXSTests: SystemTests {
 
         try mpu.execute(opcode)
         XCTAssert(mpu.registers.SP == mpu.registers.X)
-        XCTAssert(mpu.stackPointerAddress == Microprocessor.stackPointerBase + UInt16(mpu.registers.X))
+        XCTAssert(mpu.registers.$SP == Microprocessor.stackPointerBase + UInt16(mpu.registers.X))
     }
 }

@@ -34,6 +34,6 @@ final class FunctionalTests: End2EndTest {
             }
         }
 
-        waitForExpectations(timeout: 120)
+        waitForExpectations(timeout: 180)
     }
 }

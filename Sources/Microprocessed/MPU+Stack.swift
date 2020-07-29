@@ -12,18 +12,14 @@ extension Microprocessor {
     public static let stackPointerBase: UInt16 = 0x0100
     public static let stackPointerEnd: UInt16 = 0x01FF
 
-    public var stackPointerAddress: UInt16 {
-        return Microprocessor.stackPointerBase + UInt16(registers.SP)
-    }
-
     func pop() throws -> UInt8 {
         registers.SP = registers.SP &+ 1
 
-        return try memory.read(from: stackPointerAddress)
+        return try memory.read(from: registers.$SP)
     }
 
     func push(_ value: UInt8) throws {
-        try memory.write(to: stackPointerAddress, data: value)
+        try memory.write(to: registers.$SP, data: value)
         registers.SP = registers.SP &- 1
     }
 }
@@ -50,7 +46,7 @@ extension Microprocessor {
 
     func dumpStack() throws {
         for pointer in Microprocessor.stackPointerBase...(Microprocessor.stackPointerBase + 0xFF) {
-            let prefix = pointer == stackPointerAddress ? "-->" : "   "
+            let prefix = pointer == registers.$SP ? "-->" : "   "
             let value = try memory.read(from: pointer)
             let address = pointer % 0x08 == 0 ? pointer.hex : ""
             print("\(prefix) [\(value.hex)]  \(address)")

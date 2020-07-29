@@ -20,7 +20,7 @@ public struct Registers: Equatable, Hashable {
     public var Y: UInt8 = 0
     
     /// Stack pointer offset
-    public var SP: UInt8 = 0
+    @StackPointer public var SP: UInt8 = 0
     
     /// Status register
     @HardwareStatusFlags public var SR: UInt8 = 0
@@ -177,5 +177,23 @@ extension HardwareStatusFlags: CustomStringConvertible {
 
     public var description: String {
         return flags.description
+    }
+}
+
+
+@propertyWrapper
+public struct StackPointer: Equatable, Hashable {
+
+    public var wrappedValue: UInt8 {
+        didSet {
+            self.projectedValue = Microprocessor.stackPointerBase + UInt16(wrappedValue)
+        }
+    }
+
+    public private(set) var projectedValue: UInt16
+
+    public init(wrappedValue: UInt8) {
+        self.wrappedValue = wrappedValue
+        self.projectedValue = Microprocessor.stackPointerBase + UInt16(wrappedValue)
     }
 }

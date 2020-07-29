@@ -4,18 +4,18 @@ import XCTest
 final class StackTests: SystemTests {
 
     func testStackPointerAddress() {
-        XCTAssert(mpu.stackPointerAddress == 0x1FF)
+        XCTAssert(mpu.registers.$SP == 0x1FF)
 
         mpu.registers.SP = 0x01
-        XCTAssert(mpu.stackPointerAddress == 0x101)
+        XCTAssert(mpu.registers.$SP == 0x101)
     }
 
     func testPush() throws {
-        XCTAssert(mpu.stackPointerAddress == 0x1FF)
+        XCTAssert(mpu.registers.$SP == 0x1FF)
 
         try mpu.push(0x01)
 
-        XCTAssert(mpu.stackPointerAddress == 0x1FE)
+        XCTAssert(mpu.registers.$SP == 0x1FE)
         XCTAssert(try ram.read(from: 0x1FF) == 0x01)
     }
 
@@ -26,14 +26,14 @@ final class StackTests: SystemTests {
 
         let value = try mpu.pop()
         XCTAssert(value == 0x01)
-        XCTAssert(mpu.stackPointerAddress == 0x101)
+        XCTAssert(mpu.registers.$SP == 0x101)
     }
 
     func testPushWord() throws {
-        XCTAssert(mpu.stackPointerAddress == 0x1FF)
+        XCTAssert(mpu.registers.$SP == 0x1FF)
 
         try mpu.pushWord(0xBEEF)
-        XCTAssert(mpu.stackPointerAddress == 0x1FD)
+        XCTAssert(mpu.registers.$SP == 0x1FD)
         XCTAssert(try ram.read(from: 0x1FF) == 0xBE)
         XCTAssert(try ram.read(from: 0x1FE) == 0xEF)
     }
@@ -45,7 +45,7 @@ final class StackTests: SystemTests {
         try ram.write(to: 0x101, data: 0xEF)
 
         let word = try mpu.popWord()
-        XCTAssert(mpu.stackPointerAddress == 0x102)
+        XCTAssert(mpu.registers.$SP == 0x102)
         XCTAssert(word == 0xBEEF)
     }
 }
