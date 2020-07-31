@@ -14,7 +14,6 @@ extension Microprocessor {
 
     func pop() throws -> UInt8 {
         registers.SP = registers.SP &+ 1
-
         return try memory.read(from: registers.$SP)
     }
 

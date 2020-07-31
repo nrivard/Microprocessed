@@ -14,7 +14,7 @@ extension UInt16 {
     }
 }
 
-public enum IntegerSyntaxParadigm {
+public enum IntegerSyntaxParadigm: Int {
     case assembly
     case c
 
@@ -41,10 +41,6 @@ public enum IntegerSyntaxParadigm {
 }
 
 extension FixedWidthInteger {
-
-    public func rebase(fromRadix: Self, toRadix: Self) -> Self {
-        return self
-    }
 
     public var hex: String {
         return hex()

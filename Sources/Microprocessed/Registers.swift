@@ -69,54 +69,67 @@ extension Registers {
 
 extension Registers {
 
+    @inlinable
     mutating func setCarry() {
         SR |= StatusFlags.didCarry.rawValue
     }
 
+    @inlinable
     mutating func clearCarry() {
         SR &= ~StatusFlags.didCarry.rawValue
     }
 
+    @inlinable
     mutating func setZero() {
         SR |= StatusFlags.isZero.rawValue
     }
 
+    @inlinable
     mutating func clearZero() {
         SR &= ~StatusFlags.isZero.rawValue
     }
 
+    @inlinable
     mutating func setOverflow() {
         SR |= StatusFlags.didOverflow.rawValue
     }
 
+    @inlinable
     mutating func clearOverflow() {
         SR &= ~StatusFlags.didOverflow.rawValue
     }
 
+    @inlinable
     mutating func setIsNegative() {
         SR |= StatusFlags.isNegative.rawValue
     }
 
+    @inlinable
     mutating func clearIsNegative() {
         SR &= ~StatusFlags.isNegative.rawValue
     }
 
+    @inlinable
     mutating func setInterruptsDisabled() {
         SR |= StatusFlags.interruptsDisabled.rawValue
     }
 
+    @inlinable
     mutating func clearInterruptsDisabled() {
         SR &= ~StatusFlags.interruptsDisabled.rawValue
     }
 
+    @inlinable
     mutating func setDecimal() {
         SR |= StatusFlags.decimalMode.rawValue
     }
 
+    @inlinable
     mutating func clearDecimal() {
         SR &= ~StatusFlags.decimalMode.rawValue
     }
 
+    @inlinable
     mutating func clearSoftwareInterrupt() {
         SR &= ~StatusFlags.isSoftwareInterrupt.rawValue
     }
