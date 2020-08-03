@@ -56,8 +56,12 @@ extension Instruction {
 extension Instruction: CustomStringConvertible {
 
     public var description: String {
+        return disassembled + "    ; opcode: \(opcode.hex(syntaxParadigm: .assembly))"
+    }
+
+    public var disassembled: String {
         let addressingModeString = addressingMode.description
         let paddedAddressingMode = addressingModeString + String(repeating: " ", count: 10 - addressingModeString.count)
-        return String(format: "\(mnemonic.rawValue.uppercased()) \(paddedAddressingMode)    ; opcode: \(opcode.hex(syntaxParadigm: .assembly))")
+        return String(format: "\(mnemonic.rawValue.uppercased()) \(paddedAddressingMode)")
     }
 }

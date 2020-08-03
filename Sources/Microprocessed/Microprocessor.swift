@@ -67,12 +67,16 @@ public class Microprocessor {
 
         try execute(try fetch())
     }
+
+    /// peek at what the next instruction is
+    public func peek() throws -> Instruction {
+        return try Instruction(memory: memory, registers: registers)
+    }
 }
 
 extension Microprocessor {
 
     /// send an interrupt signal. This may be ignored if `interruptsDisabled` is enabled
-    /// TODO: create a software originated variant of this for BRK
     public func interrupt() throws {
         guard !registers.$SR.contains(.interruptsDisabled) else {
             return

@@ -85,6 +85,17 @@ final class MicroprocessorTests: SystemTests {
         XCTAssert(mpu.registers.PC == anotherIRQAddress)
         XCTAssert(mpu.registers.$SR.contains(.interruptsDisabled))
     }
+
+    func testPeek() throws {
+        let pc = mpu.registers.PC
+        try mpu.writeOpcode(0xA9, data: 0x01)
+
+        let instr = try mpu.peek()
+        XCTAssert(mpu.registers.PC == pc)
+        XCTAssert(instr.opcode == 0xA9)
+        XCTAssert(instr.mnemonic == .lda)
+        XCTAssert(instr.addressingMode == .immediate(value: 0x01))
+    }
 }
 
 extension Microprocessor {
