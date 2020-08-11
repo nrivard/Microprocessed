@@ -9,7 +9,7 @@ import Foundation
 
 extension Instruction {
 
-    public enum Mnemonic: String {
+    public enum Mnemonic: String, CaseIterable {
 
         // MARK: - Load
         case lda
