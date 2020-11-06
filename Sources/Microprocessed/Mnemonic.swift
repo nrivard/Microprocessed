@@ -120,174 +120,34 @@ extension Instruction {
         case unused
         case undefined
 
+        // aliases for easy alignment in the opcode arrays
+        static let unu: Mnemonic = .unused
+        static let und: Mnemonic = .undefined
+
+        static let opcodes: ContiguousArray<Instruction.Mnemonic> = [
+
+          /* $x0   $x1   $x2   $x3   $x4   $x5   $x6   $x7   $x8   $x9   $xA   $xB   $xC   $xD   $xE   $xF  */
+            .brk, .ora, .unu, .unu, .tsb, .ora, .asl, .rmb, .php, .ora, .asl, .unu, .tsb, .ora, .asl, .bbr, // $0x
+            .bpl, .ora, .ora, .unu, .trb, .ora, .asl, .rmb, .clc, .ora, .ina, .unu, .trb, .ora, .asl, .bbr, // $1x
+            .jsr, .and, .unu, .unu, .bit, .and, .rol, .rmb, .plp, .and, .rol, .unu, .bit, .and, .rol, .bbr, // $2x
+            .bmi, .and, .and, .unu, .bit, .and, .rol, .rmb, .sec, .and, .dea, .unu, .bit, .and, .rol, .bbr, // $3x
+            .rti, .eor, .unu, .unu, .unu, .eor, .lsr, .rmb, .pha, .eor, .lsr, .unu, .jmp, .eor, .lsr, .bbr, // $4x
+            .bvc, .eor, .eor, .unu, .unu, .eor, .lsr, .rmb, .cli, .eor, .phy, .unu, .unu, .eor, .lsr, .bbr, // $5x
+            .rts, .adc, .unu, .unu, .stz, .adc, .ror, .rmb, .pla, .adc, .ror, .unu, .jmp, .adc, .ror, .bbr, // $6x
+            .bvs, .adc, .adc, .unu, .stz, .adc, .ror, .rmb, .sei, .adc, .ply, .unu, .jmp, .adc, .ror, .bbr, // $7x
+            .bra, .sta, .unu, .unu, .sty, .sta, .stx, .smb, .dey, .bit, .txa, .unu, .sty, .sta, .stx, .bbs, // $8x
+            .bcc, .sta, .sta, .unu, .sty, .sta, .stx, .smb, .tya, .sta, .txs, .unu, .stz, .sta, .stz, .bbs, // $9x
+            .ldy, .lda, .ldx, .unu, .ldy, .lda, .ldx, .smb, .tay, .lda, .tax, .unu, .ldy, .lda, .ldx, .bbs, // $Ax
+            .bcs, .lda, .lda, .unu, .ldy, .lda, .ldx, .smb, .clv, .lda, .tsx, .unu, .ldy, .lda, .ldx, .bbs, // $Bx
+            .cpy, .cmp, .unu, .unu, .cpy, .cmp, .dec, .smb, .iny, .cmp, .dex, .wai, .cpy, .cmp, .dec, .bbs, // $Cx
+            .bne, .cmp, .cmp, .unu, .unu, .cmp, .dec, .smb, .cld, .cmp, .phx, .stp, .unu, .cmp, .dec, .bbs, // $Dx
+            .cpx, .sbc, .unu, .unu, .cpx, .sbc, .inc, .smb, .inx, .sbc, .nop, .unu, .cpx, .sbc, .inc, .bbs, // $Ex
+            .beq, .sbc, .sbc, .unu, .unu, .sbc, .inc, .smb, .sed, .sbc, .plx, .unu, .unu, .sbc, .inc, .bbs, // $Fx
+        ]
+
         init(_ opcode: UInt8) {
-            switch opcode {
-            case Opcodes.lda:
-                self = .lda
-            case Opcodes.ldx:
-                self = .ldx
-            case Opcodes.ldy:
-                self = .ldy
-
-            case Opcodes.sta:
-                self = .sta
-            case Opcodes.stx:
-                self = .stx
-            case Opcodes.sty:
-                self = .sty
-            case Opcodes.stz:
-                self = .stz
-
-            case Opcodes.pha:
-                self = .pha
-            case Opcodes.phx:
-                self = .phx
-            case Opcodes.phy:
-                self = .phy
-            case Opcodes.php:
-                self = .php
-
-            case Opcodes.pla:
-                self = .pla
-            case Opcodes.plx:
-                self = .plx
-            case Opcodes.ply:
-                self = .ply
-            case Opcodes.plp:
-                self = .plp
-
-            case Opcodes.tsx:
-                self = .tsx
-            case Opcodes.txs:
-                self = .txs
-
-            case Opcodes.ina:
-                self = .ina
-            case Opcodes.inx:
-                self = .inx
-            case Opcodes.iny:
-                self = .iny
-            case Opcodes.inc:
-                self = .inc
-
-            case Opcodes.dea:
-                self = .dea
-            case Opcodes.dex:
-                self = .dex
-            case Opcodes.dey:
-                self = .dey
-            case Opcodes.dec:
-                self = .dec
-
-            case Opcodes.asl:
-                self = .asl
-            case Opcodes.lsr:
-                self = .lsr
-            case Opcodes.rol:
-                self = .rol
-            case Opcodes.ror:
-                self = .ror
-
-            case Opcodes.and:
-                self = .and
-            case Opcodes.ora:
-                self = .ora
-            case Opcodes.eor:
-                self = .eor
-            case Opcodes.bit:
-                self = .bit
-
-            case Opcodes.cmp:
-                self = .cmp
-            case Opcodes.cpx:
-                self = .cpx
-            case Opcodes.cpy:
-                self = .cpy
-
-            case Opcodes.tsb:
-                self = .tsb
-            case Opcodes.trb:
-                self = .trb
-            case Opcodes.smb:
-                self = .smb
-            case Opcodes.rmb:
-                self = .rmb
-
-            case Opcodes.adc:
-                self = .adc
-            case Opcodes.sbc:
-                self = .sbc
-
-            case Opcodes.jmp:
-                self = .jmp
-            case Opcodes.jsr:
-                self = .jsr
-            case Opcodes.rts:
-                self = .rts
-            case Opcodes.rti:
-                self = .rti
-
-            case Opcodes.bra:
-                self = .bra
-            case Opcodes.beq:
-                self = .beq
-            case Opcodes.bne:
-                self = .bne
-            case Opcodes.bcc:
-                self = .bcc
-            case Opcodes.bcs:
-                self = .bcs
-            case Opcodes.bvc:
-                self = .bvc
-            case Opcodes.bvs:
-                self = .bvs
-            case Opcodes.bmi:
-                self = .bmi
-            case Opcodes.bpl:
-                self = .bpl
-            case Opcodes.bbr:
-                self = .bbr
-            case Opcodes.bbs:
-                self = .bbs
-
-            case Opcodes.clc:
-                self = .clc
-            case Opcodes.cld:
-                self = .cld
-            case Opcodes.cli:
-                self = .cli
-            case Opcodes.clv:
-                self = .clv
-            case Opcodes.sec:
-                self = .sec
-            case Opcodes.sed:
-                self = .sed
-            case Opcodes.sei:
-                self = .sei
-
-            case Opcodes.tax:
-                self = .tax
-            case Opcodes.tay:
-                self = .tay
-            case Opcodes.txa:
-                self = .txa
-            case Opcodes.tya:
-                self = .tya
-
-            case Opcodes.nop:
-                self = .nop
-            case Opcodes.brk:
-                self = .brk
-            case Opcodes.stp:
-                self = .stp
-            case Opcodes.wai:
-                self = .wai
-
-            case Opcodes.unused:
-                self = .unused
-
-            default:
-                self = .undefined
+            self = Mnemonic.opcodes.withUnsafeBufferPointer { unsafePointer in
+                return unsafePointer[Int(opcode)]
             }
         }
     }
