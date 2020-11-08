@@ -318,7 +318,3 @@ extension Instruction.AddressingMode: CustomStringConvertible {
         }
     }
 }
-
-func ~=<Values: Sequence>(sequence: Values, value: Values.Element) -> Bool where Values.Element: Equatable {
-    return sequence.contains(value)
-}
