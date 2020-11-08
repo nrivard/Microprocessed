@@ -10,6 +10,7 @@ import Foundation
 extension Instruction {
 
     public enum AddressingMode {
+
         public enum Error: Swift.Error {
             case unknown
             case noAssociatedValue
@@ -42,92 +43,137 @@ extension Instruction {
         case unused2
         case unused3
 
-        public init(_ opcode: UInt8, memory: MemoryAddressable, registers: Registers) throws {
-            typealias Opcodes = Instruction.AddressingMode.Opcodes
+        /// an internal fixed width (for dumb reasons. to have an aligned grid when mapping to opcodes) mnemonic of addressing modes for quicker resolution
+        private enum Mnemonic {
+            case absolute
+            case a_idx_in
+            case a_idx_x_
+            case a_idx_y_
+            case a_indrct
+            case zeropage
+            case zp_idx_i
+            case zp_idx_x
+            case zp_idx_y
+            case zp_indct
+            case zp_idc_i
+            case accumltr
+            case implied_
+            case stack___
+            case immdiate
+            case relative
+            case zp_reltv
+            case unused_1
+            case unused_2
+            case unused_3
+        }
 
-            switch opcode {
-            case Opcodes.implied:
+        static private let opcodes: ContiguousArray<Instruction.AddressingMode.Mnemonic> = [
+          /* $x0        $x1        $x2       $x3        $x4        $x5        $x6         $x7       $x8        $x9        $xA         $xB        $xC        $xD        $xE       $xF  */
+            .stack___, .zp_idx_i, .unused_2, .unused_1, .zeropage, .zeropage, .zeropage, .zeropage, .stack___, .immdiate, .accumltr, .unused_1, .absolute, .absolute, .absolute, .zp_reltv, // $0x
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .zeropage, .zp_idx_x, .zp_idx_x, .zeropage, .implied_, .a_idx_y_, .accumltr, .unused_1, .absolute, .a_idx_x_, .a_idx_x_, .zp_reltv, // $1x
+            .absolute, .zp_idx_i, .unused_2, .unused_1, .zeropage, .zeropage, .zeropage, .zeropage, .stack___, .immdiate, .accumltr, .unused_1, .absolute, .absolute, .absolute, .zp_reltv, // $2x
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .zp_idx_x, .zp_idx_x, .zp_idx_x, .zeropage, .implied_, .a_idx_y_, .accumltr, .unused_1, .a_idx_x_, .a_idx_x_, .a_idx_x_, .zp_reltv, // $3x
+            .stack___, .zp_idx_i, .unused_2, .unused_1, .unused_2, .zeropage, .zeropage, .zeropage, .stack___, .immdiate, .accumltr, .unused_1, .absolute, .absolute, .absolute, .zp_reltv, // $4x
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .unused_2, .zp_idx_x, .zp_idx_x, .zeropage, .implied_, .a_idx_y_, .stack___, .unused_1, .unused_3, .a_idx_x_, .a_idx_x_, .zp_reltv, // $5x
+            .stack___, .zp_idx_i, .unused_2, .unused_1, .zeropage, .zeropage, .zeropage, .zeropage, .stack___, .immdiate, .accumltr, .unused_1, .a_indrct, .absolute, .absolute, .zp_reltv, // $6x
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .zp_idx_x, .zp_idx_x, .zp_idx_x, .zeropage, .implied_, .a_idx_y_, .stack___, .unused_1, .a_idx_in, .a_idx_x_, .a_idx_x_, .zp_reltv, // $7x
+            .relative, .zp_idx_i, .unused_2, .unused_1, .zeropage, .zeropage, .zeropage, .zeropage, .implied_, .immdiate, .implied_, .unused_1, .absolute, .absolute, .absolute, .zp_reltv, // $8x
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .zp_idx_x, .zp_idx_x, .zp_idx_y, .zeropage, .implied_, .a_idx_y_, .implied_, .unused_1, .absolute, .a_idx_x_, .a_idx_x_, .zp_reltv, // $9x
+            .immdiate, .zp_idx_i, .immdiate, .unused_1, .zeropage, .zeropage, .zeropage, .zeropage, .implied_, .immdiate, .implied_, .unused_1, .absolute, .absolute, .absolute, .zp_reltv, // $Ax
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .zp_idx_x, .zp_idx_x, .zp_idx_y, .zeropage, .implied_, .a_idx_y_, .implied_, .unused_1, .a_idx_x_, .a_idx_x_, .a_idx_y_, .zp_reltv, // $Bx
+            .immdiate, .zp_idx_i, .unused_2, .unused_1, .zeropage, .zeropage, .zeropage, .zeropage, .implied_, .immdiate, .implied_, .implied_, .absolute, .absolute, .absolute, .zp_reltv, // $Cx
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .unused_2, .zp_idx_x, .zp_idx_x, .zeropage, .implied_, .a_idx_y_, .stack___, .implied_, .unused_3, .a_idx_x_, .a_idx_x_, .zp_reltv, // $Dx
+            .immdiate, .zp_idx_i, .unused_2, .unused_1, .zeropage, .zeropage, .zeropage, .zeropage, .implied_, .immdiate, .implied_, .unused_1, .absolute, .absolute, .absolute, .zp_reltv, // $Ex
+            .relative, .zp_idc_i, .zp_indct, .unused_1, .unused_2, .zp_idx_x, .zp_idx_x, .zeropage, .implied_, .a_idx_y_, .stack___, .unused_1, .unused_3, .a_idx_x_, .a_idx_x_, .zp_reltv, // $Fx
+        ]
+
+        public init(_ opcode: UInt8, memory: MemoryAddressable, registers: Registers) throws {
+            let mnemonic = Instruction.AddressingMode.opcodes.withUnsafeBufferPointer { unsafePointer in
+                return unsafePointer[Int(opcode)]
+            }
+
+            switch mnemonic {
+            case .implied_:
                 self = .implied
 
-            case Opcodes.accumulator:
+            case .accumltr:
                 self = .accumulator
 
-            case Opcodes.stack:
+            case .stack___:
                 self = .stack
 
-            case Instruction.AddressingMode.Opcodes.immediate:
+            case .immdiate:
                 let value = try memory.read(from: registers.PC + 1)
                 self = .immediate(value: value)
 
-            case Instruction.AddressingMode.Opcodes.absolute:
+            case .absolute:
                 let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
                 self = .absolute(address: addr)
 
-            case Instruction.AddressingMode.Opcodes.absoluteIndexedX:
+            case .a_idx_x_:
                 let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
                 let offset = registers.X
                 self = .absoluteIndexed(address: addr, offset: offset)
 
-            case Instruction.AddressingMode.Opcodes.absoluteIndexedY:
+            case .a_idx_y_:
                 let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
                 let offset = registers.Y
                 self = .absoluteIndexed(address: addr, offset: offset)
 
-            case Instruction.AddressingMode.Opcodes.absoluteIndirect:
+            case .a_indrct:
                 let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
                 self = .absoluteIndirect(address: addr)
 
-            case Instruction.AddressingMode.Opcodes.absoluteIndexedIndirect:
+            case .a_idx_in:
                 let addr = try memory.readWord(fromAddressStartingAt: registers.PC + 1)
                 let offset = registers.X
                 self = .absoluteIndexedIndirect(address: addr, offset: offset)
 
-            case Instruction.AddressingMode.Opcodes.zeroPage:
+            case .zeropage:
                 let addr = try memory.read(from: registers.PC + 1)
                 self = .zeroPage(address: addr)
 
-            case Instruction.AddressingMode.Opcodes.zeroPageIndexedX:
+            case .zp_idx_x:
                 let addr = try memory.read(from: registers.PC + 1)
                 let offset = registers.X
                 self = .zeroPageIndexed(address: addr, offset: offset)
 
-            case Instruction.AddressingMode.Opcodes.zeroPageIndexedY:
+            case .zp_idx_y:
                 let addr = try memory.read(from: registers.PC + 1)
                 let offset = registers.Y
                 self = .zeroPageIndexed(address: addr, offset: offset)
 
-            case Instruction.AddressingMode.Opcodes.zeroPageIndirect:
+            case .zp_indct:
                 let addr = try memory.read(from: registers.PC + 1)
                 self = .zeroPageIndirect(address: addr)
 
-            case Instruction.AddressingMode.Opcodes.zeroPageIndexedIndirect:
+            case .zp_idx_i:
                 let addr = try memory.read(from: registers.PC + 1)
                 let offset = registers.X
                 self = .zeroPageIndexedIndirect(address: addr, offset: offset)
 
-            case Instruction.AddressingMode.Opcodes.zeroPageIndirectIndexed:
+            case .zp_idc_i:
                 let addr = try memory.read(from: registers.PC + 1)
                 let offset = registers.Y
                 self = .zeroPageIndirectIndexed(address: addr, offset: offset)
 
-            case Instruction.AddressingMode.Opcodes.relative:
+            case .relative:
                 let offset = try memory.read(from: registers.PC + 1)
                 self = .relative(offset: Int8(bitPattern: offset))
 
-            case Instruction.AddressingMode.Opcodes.zeroPageThenRelative:
+            case .zp_reltv:
                 let zeroPage = try memory.read(from: registers.PC + 1)
                 let relative = try memory.read(from: registers.PC + 2)
                 self = .zeroPageThenRelative(zeroPage: zeroPage, relative: Int8(bitPattern: relative))
 
-            case Instruction.AddressingMode.Opcodes.unused1:
+            case .unused_1:
                 self = .unused1
-            case Instruction.AddressingMode.Opcodes.unused2:
-                self = .unused2
-            case Instruction.AddressingMode.Opcodes.unused3:
-                self = .unused3
 
-            default:
-                throw Instruction.AddressingMode.Error.unknown
+            case .unused_2:
+                self = .unused2
+
+            case .unused_3:
+                self = .unused3
             }
         }
     }
@@ -171,8 +217,6 @@ extension Instruction.AddressingMode {
 
         case .zeroPageIndexedIndirect(let addr, let offset):
             // supports wraparound addressing in zero page
-            //
-            // TODO: if first byte is stored at `0xFF`, where should second byte live: 0x100 or 0x000?
             return try memory.readWord(fromAddressStartingAt: UInt16(UInt8(addr &+ offset)))
 
         case .zeroPageIndirectIndexed(let addr, let offset):

@@ -495,12 +495,12 @@ extension Microprocessor {
         let result: UInt16
 
         if !registers.$SR.contains(.decimalMode) {
-            result = [registers.A, byte, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
+            result = [registers.A, byte, registers.arithmeticCarry].lazy.map(UInt16.init).reduce(0, +)
 
             registers.updateOverflow(for: result, leftOperand: value, rightOperand: registers.A)
         } else {
-            var lowNibble = [registers.A & 0x0F, byte & 0x0F, registers.arithmeticCarry].map(UInt16.init).reduce(0, +)
-            var highNibble = [registers.A & 0xF0, byte & 0xF0].map(UInt16.init).reduce(0, +)
+            var lowNibble = [registers.A & 0x0F, byte & 0x0F, registers.arithmeticCarry].lazy.map(UInt16.init).reduce(0, +)
+            var highNibble = [registers.A & 0xF0, byte & 0xF0].lazy.map(UInt16.init).reduce(0, +)
 
             if lowNibble >= 0x0A {
                 lowNibble = (lowNibble &+ 0x06) & 0x0F
