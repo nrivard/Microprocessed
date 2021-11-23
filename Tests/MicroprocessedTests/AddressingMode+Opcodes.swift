@@ -1,13 +1,14 @@
 //
-//  File.swift
+//  AddressingMode+Opcodes.swift
 //  
 //
 //  Created by Nate Rivard on 24/06/2020.
 //
 
-import Foundation
+@testable import Microprocessed
 
 /// The canonical list of opcodes separated out into WDC65C02 categories
+/// NOTE: this is _only_ used for tests. See `Instruction.opcodes` for the faster version actually used
 ///
 /// (https://www.mouser.co.uk/datasheet/2/436/w65c02s-2572.pdf)
 extension Instruction.AddressingMode {

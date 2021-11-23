@@ -8,7 +8,12 @@ class End2EndTest: XCTestCase {
     var ram: MemoryAddressable!
     var mpu: Microprocessor!
 
-    var runQueue = DispatchQueue(label: "Microprocessor", qos: .userInteractive, attributes: [], autoreleaseFrequency: .workItem)
+    var runQueue = DispatchQueue(
+        label: "Microprocessor",
+        qos: .userInteractive,
+        attributes: [],
+        autoreleaseFrequency: .workItem
+    )
 
     var filePath: String {
         fatalError("Test subclass must declare this property")
@@ -31,7 +36,7 @@ class End2EndTest: XCTestCase {
         let data = try Data(contentsOf: path)
         let bytes: [UInt8] = .init(data)
 
-        self.ram = ROMMemory(rom: bytes)
+        self.ram = RAM(bytes)
         self.mpu = Microprocessor(memoryLayout: ram, configuration: .init(warnOnUnusedOpcodes: false))
 
         try mpu.reset()

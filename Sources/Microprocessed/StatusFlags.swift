@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  StatusFlags.swift
 //  
 //
 //  Created by Nate Rivard on 25/06/2020.

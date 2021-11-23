@@ -158,7 +158,7 @@ extension Registers: CustomStringConvertible {
 }
 
 /// Wraps the underlying value at the hardware level. This will always return `alwaysSet` and `isSoftwareInterrupt` as those
-/// can only be something else on the stack, never at the hardware level
+/// can only be a different value on the stack, never at the hardware level
 @propertyWrapper
 public struct HardwareStatusFlags: Equatable, Hashable {
 
@@ -194,15 +194,21 @@ extension HardwareStatusFlags: CustomStringConvertible {
 }
 
 
+/// Property wrapper that exposes the stack pointer either as an offset (from `Microprocessor.stackPointerBase`)
+/// or as a full address
 @propertyWrapper
 public struct StackPointer: Equatable, Hashable {
 
+    /// 8-bit offset this stack pointer currently represents
+    /// ex: if the stack pointer currently points to `$01FA`, `wrappedValue` will be `$FA`
     public var wrappedValue: UInt8 {
         didSet {
             self.projectedValue = Microprocessor.stackPointerBase + UInt16(wrappedValue)
         }
     }
 
+    /// The full address this stack pointer currently represents
+    /// ex: if the stack pointer offset is currently `$FA`, `projectedValue` will be `$01FA`
     public private(set) var projectedValue: UInt16
 
     public init(wrappedValue: UInt8) {

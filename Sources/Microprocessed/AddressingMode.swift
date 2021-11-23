@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  AddressingMode.swift
 //  
 //
 //  Created by Nate Rivard on 24/06/2020.
@@ -9,7 +9,7 @@ import Foundation
 
 extension Instruction {
 
-    public enum AddressingMode {
+    public enum AddressingMode: Equatable, Hashable {
 
         public enum Error: Swift.Error {
             case unknown
@@ -204,7 +204,6 @@ extension Instruction.AddressingMode {
     /// returns the result address
     public func address(from memory: MemoryAddressable, registers: Registers) throws -> UInt16 {
         switch self {
-
         case .zeroPage(let addr):
             return UInt16(addr)
 
@@ -239,48 +238,6 @@ extension Instruction.AddressingMode {
             
         case .immediate, .implied, .accumulator, .stack, .unused1, .unused2, .unused3:
             throw Error.noResolvedAddress
-        }
-    }
-}
-
-extension Instruction.AddressingMode: Equatable, Hashable {
-
-    public static func ==(lhs: Instruction.AddressingMode, rhs: Instruction.AddressingMode) -> Bool {
-        switch (lhs, rhs) {
-        case (.immediate(let left), .immediate(let right)),
-             (.zeroPage(let left), .zeroPage(let right)),
-             (.zeroPageIndirect(let left), .zeroPageIndirect(let right)):
-            return left == right
-
-        case (.relative(let left), .relative(let right)):
-            return left == right
-
-        case (.absolute(let left), .absolute(let right)),
-             (.absoluteIndirect(let left), .absoluteIndirect(let right)):
-            return left == right
-
-        case (.zeroPageIndexed(let leftAddr, let leftOffset), .zeroPageIndexed(let rightAddr, let rightOffset)),
-             (.zeroPageIndexedIndirect(let leftAddr, let leftOffset), .zeroPageIndexedIndirect(let rightAddr, let rightOffset)),
-             (.zeroPageIndirectIndexed(let leftAddr, let leftOffset), .zeroPageIndirectIndexed(let rightAddr, let rightOffset)):
-            return leftAddr == rightAddr && leftOffset == rightOffset
-
-        case (.absoluteIndexed(let leftAddr, let leftOffset), .absoluteIndexed(let rightAddr, let rightOffset)),
-             (.absoluteIndexedIndirect(let leftAddr, let leftOffset), .absoluteIndexedIndirect(let rightAddr, let rightOffset)):
-            return leftAddr == rightAddr && leftOffset == rightOffset
-
-        case (.zeroPageThenRelative(let leftAddr, let leftOffset), .zeroPageThenRelative(let rightAddr, let rightOffset)):
-            return leftAddr == rightAddr && leftOffset == rightOffset
-
-        case (.implied, .implied),
-             (.stack, .stack),
-             (.accumulator, .accumulator),
-             (.unused1, .unused1),
-             (.unused2, .unused2),
-             (.unused3, .unused3):
-            return true
-
-        default:
-            return false
         }
     }
 }

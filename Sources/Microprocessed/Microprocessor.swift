@@ -114,7 +114,7 @@ extension Microprocessor {
 
     /// fetch an instruction and increment the PC
     func fetch() throws -> Instruction {
-        let instruction = try Instruction(memory: memory, registers: registers)
+        let instruction = try peek()
         registers.PC += instruction.size
 
         return instruction
@@ -354,7 +354,7 @@ extension Microprocessor {
             registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)
 
         case .jsr:
-            // writes the *address* of the last byte of the instruction to the stack
+            // writes the *address* of the last byte of the _current_ instruction to the stack
             // this is effectively the current PC (which has already been incremented to the _next_ instruction) - 1
             try pushWord(registers.PC - 1)
             registers.PC = try instruction.addressingMode.address(from: memory, registers: registers)

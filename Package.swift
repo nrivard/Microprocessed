@@ -4,11 +4,11 @@ import PackageDescription
 
 let package = Package(
     name: "Microprocessed",
-//    platforms: [
-//        .iOS(.v13),
-//        .macOS(.v10_15),
-//        .tvOS(.v13)
-//    ],
+    platforms: [
+        .iOS(.v13),
+        .macOS(.v10_15),
+        .tvOS(.v13)
+    ],
     products: [
         .library(
             name: "Microprocessed",
