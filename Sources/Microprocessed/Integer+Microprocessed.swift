@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Integer+Microprocessed.swift
 //  
 //
 //  Created by Nate Rivard on 30/06/2020.

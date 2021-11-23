@@ -21,15 +21,13 @@ class SystemTests: XCTestCase {
         ram = nil
         mpu = nil
     }
-
-    func reset(toAddress address: UInt16) throws {
-        try ram.write(toAddressStartingAt: Microprocessor.resetVector, word: address)
-        try mpu.reset()
-    }
 }
 
 extension SystemTests {
 
+    /// executes `opcode`, a branch-based instruction, using different offsets and differing conditions
+    /// `notTakenCondition` is a closure that should setup a condition where after executing `opcode`, mpu does _not_ branch
+    /// `takenCondition` is a closure that should setup a condition where after executing `opcode`, mpu _does_ branch
     func runBranchTest(opcode: UInt8, notTakenCondition: @autoclosure () throws -> Void, takenCondition: @autoclosure () throws -> Void) throws {
         let offsets: [Int8] = [0x03, -0x07, 0x7F]
 

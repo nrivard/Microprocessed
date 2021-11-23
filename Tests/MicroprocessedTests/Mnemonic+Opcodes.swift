@@ -1,11 +1,11 @@
 //
-//  File.swift
+//  Mnemonic+Opcodes.swift
 //  
 //
 //  Created by Nate Rivard on 25/06/2020.
 //
 
-import Foundation
+@testable import Microprocessed
 
 extension Instruction.Mnemonic {
 

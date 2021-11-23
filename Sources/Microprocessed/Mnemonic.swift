@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Mnemonic.swift
 //  
 //
 //  Created by Nate Rivard on 23/06/2020.
@@ -125,7 +125,6 @@ extension Instruction {
         static let und: Mnemonic = .undefined
 
         static let opcodes: ContiguousArray<Instruction.Mnemonic> = [
-
           /* $x0   $x1   $x2   $x3   $x4   $x5   $x6   $x7   $x8   $x9   $xA   $xB   $xC   $xD   $xE   $xF  */
             .brk, .ora, .unu, .unu, .tsb, .ora, .asl, .rmb, .php, .ora, .asl, .unu, .tsb, .ora, .asl, .bbr, // $0x
             .bpl, .ora, .ora, .unu, .trb, .ora, .asl, .rmb, .clc, .ora, .ina, .unu, .trb, .ora, .asl, .bbr, // $1x
