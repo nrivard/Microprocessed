@@ -15,7 +15,7 @@ dependencies: [
 
 ## Using Microprocessed
 
-There are a two major pieces to Microprocessed that you will have to understand to get use out of this package: memory and execution.
+There are two major pieces to Microprocessed that you will have to understand to get use out of this package: memory and execution.
 
 ### Memory
 
@@ -96,7 +96,7 @@ final class DeviceRouter: MemoryAddressable {
 
     func write(to address: UInt16, data: UInt8) throws {
         switch address {
-            case 0x0000.0x7FFF:
+            case 0x0000...0x7FFF:
                 try ram.write(to: address, data: data)
             case 0x8000...0x8FFF:
                 try via.write(to: address, data: data)
@@ -151,14 +151,14 @@ After executing an instruction, you can query the `Microprocessor` about some of
 
 Lastly, you can control some aspects of execution via `Microprocessor.Configuration`.
 At present, this can control whether unused opcodes throw an error or not.
-For education purposes, you likely want to throw an error,but for pure simulation, you may not want to.
+For education purposes, you likely want to throw an error, but for pure simulation, you may not want to.
 
 ## Next Steps
 
-Currently, `Microprocessed` has everything you need to create compelling 65C02 simulation experiences, but it's not perfect.
+Microprocessed has everything you need to create compelling 65C02 simulation experiences, but it's not perfect.
 In the future, it would be great to make some changes to `Microprocessor` including:
 * convert `Microprocessor` to an `actor`. 
-This will allow calling it from any thread and protecting its internal state
+This will allow calling it from any thread while protecting its internal state
 * abstract `Microprocessor` to a protocol so other 8-bit MPUs can be swapped in, including an old NMOS 6502 or a Z80, all with the same calling conventions
 * more and better hardware simulation. 
 Many of the 65C02 pins aren't really abstracted here so you can't simulate wait states and the like. 
