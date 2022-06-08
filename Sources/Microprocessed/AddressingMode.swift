@@ -38,7 +38,7 @@ extension Instruction {
         /// then, it will return relative address for `.address(::)`
         case zeroPageThenRelative(zeroPage: UInt8, relative: Int8)
 
-        /// these are unused opcodes, bucketed by byte size
+        /// these are unused opcodes, where the number indicates byte size of the instruction
         case unused1
         case unused2
         case unused3
@@ -255,23 +255,23 @@ extension Instruction.AddressingMode: CustomStringConvertible {
         case .zeroPageIndirect(let address):
             return "(\(address.hex(syntaxParadigm: .assembly)))"
         case .zeroPageIndexed(let addr, let offset):
-            return "\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly))"
+            return "\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex)"
         case .zeroPageIndexedIndirect(let addr, offset: let offset):
-            return "(\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly)))"
+            return "(\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex))"
         case .zeroPageIndirectIndexed(let addr, offset: let offset):
-            return "(\(addr.hex(syntaxParadigm: .assembly))),\(offset.hex(syntaxParadigm: .assembly))"
+            return "(\(addr.hex(syntaxParadigm: .assembly))),\(offset.hex)"
         case .absolute(let addr):
             return addr.hex(syntaxParadigm: .assembly)
         case .absoluteIndirect(let addr):
             return "(\(addr.hex(syntaxParadigm: .assembly)))"
         case .absoluteIndexed(let addr, offset: let offset):
-            return "\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly))"
+            return "\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex)"
         case .absoluteIndexedIndirect(let addr, let offset):
-            return "(\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex(syntaxParadigm: .assembly)))"
+            return "(\(addr.hex(syntaxParadigm: .assembly)),\(offset.hex))"
         case .relative(let offset):
             return "\(offset)"
         case .zeroPageThenRelative(let zp, let relative):
-            return "\(zp.hex(syntaxParadigm: .assembly)),\(relative.hex(syntaxParadigm: .assembly))"
+            return "\(zp.hex(syntaxParadigm: .assembly)),\(relative.hex)"
         }
     }
 }
