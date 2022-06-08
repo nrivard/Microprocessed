@@ -50,13 +50,13 @@ extension FixedWidthInteger {
         return bin()
     }
 
-    public func hex(syntaxParadigm: IntegerSyntaxParadigm = .c) -> String {
+    public func hex(syntaxParadigm: IntegerSyntaxParadigm = .assembly) -> String {
         let hexString = String(self, radix: 16, uppercase: true)
         let zerosPrefix = String(repeating: "0", count: (MemoryLayout<Self>.size * 2) - hexString.count)
         return "\(syntaxParadigm.constantPrefix(radix: 16))\(zerosPrefix)\(hexString)"
     }
 
-    public func bin(syntaxParadigm: IntegerSyntaxParadigm = .c) -> String {
+    public func bin(syntaxParadigm: IntegerSyntaxParadigm = .assembly) -> String {
         let binaryString = String(self, radix: 2)
         let zerosPrefix = String(repeating: "0", count: (MemoryLayout<Self>.size * 8) - binaryString.count)
         return "\(syntaxParadigm.constantPrefix(radix: 2))\(zerosPrefix)\(binaryString)"
