@@ -32,6 +32,14 @@ public struct Instruction {
         self.mnemonic = .init(opcode)
         self.addressingMode = try .init(opcode, memory: memory, registers: registers)
     }
+
+    /// creates an instruction from passed in params. This is not used anywhere in Microprocessed itself and instead
+    /// is provided to create an instruction externally. Given that, this initializer does _no verification_
+    public init(opcode: UInt8, mnemonic: Mnemonic, addressingMode: AddressingMode) {
+        self.opcode = opcode
+        self.mnemonic = mnemonic
+        self.addressingMode = addressingMode
+    }
 }
 
 extension Instruction {
@@ -63,5 +71,13 @@ extension Instruction: CustomStringConvertible {
         let addressingModeString = addressingMode.description
         let paddedAddressingMode = addressingModeString + String(repeating: " ", count: 10 - addressingModeString.count)
         return String(format: "\(mnemonic.rawValue.uppercased()) \(paddedAddressingMode)")
+    }
+}
+
+extension Instruction {
+
+    /// A valid instruction supplied for testing or preview purposes in consumer projects
+    public static var noop: Instruction {
+        return .init(opcode: 0xEA, mnemonic: .nop, addressingMode: .implied)
     }
 }

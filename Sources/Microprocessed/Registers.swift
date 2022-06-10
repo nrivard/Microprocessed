@@ -11,24 +11,30 @@ import Foundation
 public struct Registers: Equatable, Hashable {
     
     /// accumulator
-    public var A: UInt8 = 0
+    public var A: UInt8
     
     /// X index
-    public var X: UInt8 = 0
+    public var X: UInt8
     
     /// Y index
-    public var Y: UInt8 = 0
+    public var Y: UInt8
     
     /// Stack pointer offset
-    @StackPointer public var SP: UInt8 = 0
+    @StackPointer public var SP: UInt8
     
     /// Status register
-    @HardwareStatusFlags public var SR: UInt8 = 0
+    @HardwareStatusFlags public var SR: UInt8
     
     /// Program counter
     public var PC: UInt16 = 0
 
-    public init() {}
+    public init(A: UInt8 = 0, X: UInt8 = 0, Y: UInt8 = 0, SP: UInt8 = 0, SR: UInt8 = 0) {
+        self.A = A
+        self.X = X
+        self.Y = Y
+        self.SP = SP
+        self.SR = SR
+    }
 }
 
 extension Registers {
