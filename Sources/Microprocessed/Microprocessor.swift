@@ -31,6 +31,8 @@ public class Microprocessor {
     /// Memory layout that the MPU uses to fetch opcodes and data alike
     public internal(set) var memory: MemoryAddressable
 
+    public internal(set) var interruptors: [Interrupting]
+
     /// Allows customization of the MPU, especially for learning purposes. By default, unused opcodes throw errors
     public let configuration: Configuration
 
@@ -41,8 +43,9 @@ public class Microprocessor {
     public internal(set) var runMode: RunMode = .normal
 
     /// create a `Microprocessor` with a given memory layout and configuration.
-    public required init(memoryLayout memory: MemoryAddressable, configuration: Configuration = .init()) {
+    public required init(memoryLayout memory: MemoryAddressable, interruptors: [Interrupting] = [], configuration: Configuration = .init()) {
         self.memory = memory
+        self.interruptors = interruptors
         self.configuration = configuration
     }
 
@@ -59,9 +62,27 @@ public class Microprocessor {
 
     /// send a single clock rising edge pulse to the `Microprocessor`
     public func tick() throws {
-        guard runMode == .normal else { return }
+        /// if we're halted, we're done
+        guard runMode != .stopped else { return }
 
-        try execute(try fetch())
+        /// if there are any non-maskable interrupts, deal with them
+        if !interruptors.filter({ $0.interruptStatus == .nonMaskableAssertion }).isEmpty {
+            try nonMaskableInterrupt()
+            return
+        }
+
+        /// if there are any normal interrupts, deal with them
+        if !registers.$SR.contains(.interruptsDisabled) && !interruptors.filter({ $0.interruptStatus == .maskableAssertion }).isEmpty {
+            try interrupt()
+            return
+        }
+
+        /// no interrupts
+        if case .normal = runMode {
+            try execute(try fetch())
+        }
+
+
     }
 
     /// peek at what the next instruction is
@@ -73,7 +94,7 @@ public class Microprocessor {
 extension Microprocessor {
 
     /// send an interrupt signal. This may be ignored if `interruptsDisabled` is enabled
-    public func interrupt() throws {
+    func interrupt() throws {
         guard !registers.$SR.contains(.interruptsDisabled) else {
             return
         }
@@ -82,12 +103,15 @@ extension Microprocessor {
     }
 
     /// send a non-maskable interrupt signal. This will always execute, even when `interruptsDisabled` is enabled
-    public func nonMaskableInterrupt() throws {
+    func nonMaskableInterrupt() throws {
         try interrupt(toVector: Microprocessor.nmiVector, isHardware: true)
     }
 
     private func interrupt(toVector vector: UInt16, isHardware: Bool) throws {
         guard runMode != .stopped else { return }
+
+        /// reset `runMode` to normal
+        runMode = .normal
 
         // BRK instruction is actually supposed to push PC + 2, but it's addressing mode is `stack` which is size `1`. So if this is a software IRQ,
         // we need to compensate by adding 1 to PC
