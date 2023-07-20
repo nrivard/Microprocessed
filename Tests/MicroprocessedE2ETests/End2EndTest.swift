@@ -5,7 +5,7 @@ import XCTest
 /// Subclasses need to supply `filePath`, a `String` to the binary file
 class End2EndTest: XCTestCase {
 
-    var ram: MemoryAddressable!
+    var ram: MemoryAddressable = RAM([])
     var mpu: Microprocessor!
 
     var runQueue = DispatchQueue(

@@ -5,7 +5,7 @@
 //  Created by Nate Rivard on 16/07/2020.
 //
 
-import Microprocessed
+@testable import Microprocessed
 
 extension Microprocessor {
 

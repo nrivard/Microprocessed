@@ -8,7 +8,7 @@
 import Microprocessed
 
 /// very simple read/write memory structure
-final class RAM: MemoryAddressable {
+struct RAM: MemoryAddressable {
 
     private var bytes: [UInt8]
 
@@ -24,7 +24,7 @@ final class RAM: MemoryAddressable {
         }
     }
 
-    func write(to address: UInt16, data: UInt8) throws {
+    mutating func write(to address: UInt16, data: UInt8) throws {
         bytes[Int(address)] = data
     }
 }

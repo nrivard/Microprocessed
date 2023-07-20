@@ -3,7 +3,7 @@ import XCTest
 
 class SystemTests: XCTestCase {
 
-    var ram: MemoryAddressable!
+    var ram: MemoryAddressable = TestMemory()
     var mpu: Microprocessor!
 
     override func setUpWithError() throws {
@@ -18,7 +18,6 @@ class SystemTests: XCTestCase {
     override func tearDownWithError() throws {
         try super.tearDownWithError()
 
-        ram = nil
         mpu = nil
     }
 }

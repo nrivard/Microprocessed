@@ -11,13 +11,13 @@ import Foundation
 ///
 /// To simulate your system, create an object that conforms to this protocol and responds
 /// to memory requests
-public protocol MemoryAddressable: AnyObject {
+public protocol MemoryAddressable {
 
     /// return an 8 bit value for the given 16 bit address
     func read(from address: UInt16) throws -> UInt8
 
     /// write an 8 bit value to the given 16 bit address
-    func write(to address: UInt16, data: UInt8) throws
+    mutating func write(to address: UInt16, data: UInt8) throws
 }
 
 extension MemoryAddressable {
@@ -37,7 +37,7 @@ extension MemoryAddressable {
     /// byte at `lowByteAddress + 1`
     ///
     /// TODO: this does not respect zero-page addressing wrapping so should be used with caution.
-    public func write(toAddressStartingAt lowByteAddress: UInt16, word: UInt16) throws {
+    public mutating func write(toAddressStartingAt lowByteAddress: UInt16, word: UInt16) throws {
         let highByteAddress = lowByteAddress + 1
 
         let lowByte = UInt8(truncatingIfNeeded: word)

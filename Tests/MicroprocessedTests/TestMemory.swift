@@ -1,4 +1,4 @@
-import Microprocessed
+@testable import Microprocessed
 
 /// simple `MemoryAddressable` class that you can set up some test data in and it will read/write to
 /// those addresses. Will return no-op (`0xEA`) for any reads that have not been set up
@@ -20,7 +20,7 @@ final class TestMemory: MemoryAddressable {
 
 extension MemoryAddressable {
 
-    func writeProgram(_ program: [UInt8], startingAtAddress pc: UInt16) throws {
+    mutating func writeProgram(_ program: [UInt8], startingAtAddress pc: UInt16) throws {
         for (index, byte) in program.enumerated() {
             try write(to: pc + UInt16(index), data: byte)
         }

@@ -29,7 +29,7 @@ public class Microprocessor {
     }
 
     /// Memory layout that the MPU uses to fetch opcodes and data alike
-    public unowned let memory: MemoryAddressable
+    public internal(set) var memory: MemoryAddressable
 
     /// Allows customization of the MPU, especially for learning purposes. By default, unused opcodes throw errors
     public let configuration: Configuration
@@ -41,9 +41,6 @@ public class Microprocessor {
     public internal(set) var runMode: RunMode = .normal
 
     /// create a `Microprocessor` with a given memory layout and configuration.
-    ///
-    /// NOTE: `memoryLayout` is `unowned`, so it is the creator's responsibility to keep
-    /// both the created `Microprocessor` and `memoryLayout` strongly referenced
     public required init(memoryLayout memory: MemoryAddressable, configuration: Configuration = .init()) {
         self.memory = memory
         self.configuration = configuration
