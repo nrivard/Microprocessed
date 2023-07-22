@@ -12,10 +12,10 @@ public enum InterruptStatus {
     case none
 
     /// Device is interrupting and is non-maskable
-    case nonMaskableAssertion
+    case nonMaskable
 
     /// Device is interrupting but is maskable
-    case maskableAssertion
+    case maskable
 }
 
 /// Simple protocol that seeks to answer the question: are you holding either interrupt line low?
