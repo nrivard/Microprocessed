@@ -5,12 +5,15 @@ class SystemTests: XCTestCase {
 
     var ram: MemoryAddressable = TestMemory()
     var mpu: Microprocessor!
+    var interruptors: [Interrupting] {
+        return []
+    }
 
     override func setUpWithError() throws {
         try super.setUpWithError()
 
         self.ram = TestMemory()
-        self.mpu = Microprocessor(memoryLayout: ram)
+        self.mpu = Microprocessor(memoryLayout: ram, interruptors: interruptors)
 
         try mpu.reset()
     }

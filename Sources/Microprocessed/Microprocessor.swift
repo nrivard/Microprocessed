@@ -28,8 +28,27 @@ public class Microprocessor {
         case stopped
     }
 
+    /// Defines which class of interrupts should be ignored
+    public struct InterruptStatusMask: OptionSet, Comparable {
+        public let rawValue: Int
+
+        public init(rawValue: Int) {
+            self.rawValue = rawValue
+        }
+
+        public static let irq = InterruptStatusMask(rawValue: 1 << 1)
+        public static let nmi = InterruptStatusMask(rawValue: 1 << 2)
+
+        public static func < (lhs: Microprocessor.InterruptStatusMask, rhs: Microprocessor.InterruptStatusMask) -> Bool {
+            return lhs.rawValue < rhs.rawValue
+        }
+    }
+
     /// Memory layout that the MPU uses to fetch opcodes and data alike
     public internal(set) var memory: MemoryAddressable
+
+    /// Devices that can possibly raise interrupts
+    public internal(set) var interruptors: [Interrupting]
 
     /// Allows customization of the MPU, especially for learning purposes. By default, unused opcodes throw errors
     public let configuration: Configuration
@@ -40,9 +59,13 @@ public class Microprocessor {
     /// CPU run mode state
     public internal(set) var runMode: RunMode = .normal
 
+    /// currently blocked interrupt types (which means interrupts are being serviced)
+    public internal(set) var interruptMask: InterruptStatusMask = []
+
     /// create a `Microprocessor` with a given memory layout and configuration.
-    public required init(memoryLayout memory: MemoryAddressable, configuration: Configuration = .init()) {
+    public required init(memoryLayout memory: MemoryAddressable, interruptors: [Interrupting] = [], configuration: Configuration = .init()) {
         self.memory = memory
+        self.interruptors = interruptors
         self.configuration = configuration
     }
 
@@ -55,13 +78,37 @@ public class Microprocessor {
         registers.SP = 0xFF
         registers.SR = 0 // this will actually properly set `Always` and `Break`
         runMode = .normal
+        interruptMask = []
     }
 
     /// send a single clock rising edge pulse to the `Microprocessor`
     public func tick() throws {
-        guard runMode == .normal else { return }
+        /// if we're halted, we're done
+        guard runMode != .stopped else { return }
 
-        try execute(try fetch())
+        let interruptStatuses = interruptors.map(\.interruptStatus)
+
+        /// if there are any non-maskable interrupts, deal with them
+        if interruptMask < .nmi, interruptStatuses.contains(.nonMaskable) {
+            runMode = .normal
+            try nonMaskableInterrupt()
+            return
+        }
+
+        /// if there are any normal interrupts, deal with them
+        if interruptMask < .irq, interruptStatuses.contains(.maskable) {
+            runMode = .normal
+
+            if !registers.$SR.contains(.interruptsDisabled) {
+                try interrupt()
+                return
+            }
+        }
+
+        /// no interrupts
+        if case .normal = runMode {
+            try execute(try fetch())
+        }
     }
 
     /// peek at what the next instruction is
@@ -73,17 +120,21 @@ public class Microprocessor {
 extension Microprocessor {
 
     /// send an interrupt signal. This may be ignored if `interruptsDisabled` is enabled
-    public func interrupt() throws {
-        guard !registers.$SR.contains(.interruptsDisabled) else {
-            return
-        }
-
+    func interrupt() throws {
+        interruptMask.insert(.irq)
         try interrupt(toVector: Microprocessor.irqVector, isHardware: true)
     }
 
     /// send a non-maskable interrupt signal. This will always execute, even when `interruptsDisabled` is enabled
-    public func nonMaskableInterrupt() throws {
+    func nonMaskableInterrupt() throws {
+        interruptMask.insert(.nmi)
         try interrupt(toVector: Microprocessor.nmiVector, isHardware: true)
+    }
+
+    /// send an interrupt from software (`BRK`)
+    func softwareInterrupt() throws {
+        interruptMask.insert(.irq)
+        try interrupt(toVector: Microprocessor.irqVector, isHardware: false)
     }
 
     private func interrupt(toVector vector: UInt16, isHardware: Bool) throws {
@@ -104,6 +155,14 @@ extension Microprocessor {
         registers.clearDecimal()
 
         registers.PC = try memory.readWord(fromAddressStartingAt: vector)
+    }
+
+    func downgradeInterruptMask() {
+        if let _ = interruptMask.remove(.nmi) {
+            return
+        }
+
+        interruptMask.remove(.irq)
     }
 }
 
@@ -364,6 +423,7 @@ extension Microprocessor {
             // restore status register first. make sure to set `isSoftwareInterrupt` as this is always a `1` in the actual register
             registers.SR = try pop()
             registers.PC = try popWord()
+            downgradeInterruptMask()
 
         case .bra:
             try branch(on: true, addressingMode: instruction.addressingMode)
@@ -428,7 +488,7 @@ extension Microprocessor {
             break
 
         case .brk:
-            try interrupt(toVector: Microprocessor.irqVector, isHardware: false)
+            try softwareInterrupt()
 
         case .wai:
             runMode = .waitingForInterrupt

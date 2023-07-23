@@ -15,7 +15,7 @@ dependencies: [
 
 ## Using Microprocessed
 
-There are two major pieces to Microprocessed that you will have to understand to get use out of this package: memory and execution.
+There are three major pieces to Microprocessed that you will have to understand to get use out of this package: memory, execution, and interrupts.
 
 ### Memory
 
@@ -27,13 +27,12 @@ This makes memory the most important thing you define when using Microprocessed.
 Microprocessed's memory model is defined by `MemoryAddressable`
 
 ```swift
-public protocol MemoryAddressable: AnyObject {
-
+public protocol MemoryAddressable {
     /// return an 8 bit value for the given 16 bit address
     func read(from address: UInt16) throws -> UInt8
 
     /// write an 8 bit value to the given 16 bit address
-    func write(to address: UInt16, data: UInt8) throws
+    mutating func write(to address: UInt16, data: UInt8) throws
 }
 ```
 
@@ -46,7 +45,7 @@ final class FreeRunner: MemoryAddressable {
         return 0xEA
     }
     
-    func write(to address: UInt16, data: UInt8) throws {
+    mutating func write(to address: UInt16, data: UInt8) throws {
         // ignore
     }
 }
@@ -57,7 +56,6 @@ This class now adds a proper reset vector and allows read and write access, sort
 
 ```swift
 final class TestMemory: MemoryAddressable {
-
     var memory: [UInt16: UInt8] = [
         Microprocessor.resetVector: 0x00,
         Microprocessor.resetVectorHigh: 0x80
@@ -67,7 +65,7 @@ final class TestMemory: MemoryAddressable {
         return memory[address] ?? 0xEA
     }
 
-    func write(to address: UInt16, data: UInt8) throws {
+    mutating func write(to address: UInt16, data: UInt8) throws {
         memory[address] = data
     }
 }
@@ -94,7 +92,7 @@ final class DeviceRouter: MemoryAddressable {
         }
     }
 
-    func write(to address: UInt16, data: UInt8) throws {
+    mutating func write(to address: UInt16, data: UInt8) throws {
         switch address {
             case 0x0000...0x7FFF:
                 try ram.write(to: address, data: data)
@@ -115,16 +113,13 @@ So to use `Microprocessor`, you have to provide it with some memory.
 
 ```swift
 final class System {
-    let mpu: Microprocessor!
+    let router: DeviceRouter
+    let mpu: Microprocessor
     
     init() {
-        // memoryLayout is `unowned` so you can safely provide `self` here
-        self.mpu = .init(memoryLayout: self)
+        self.router = DeviceRouter()
+        self.mpu = .init(memoryLayout: router)
     }
-}
-
-extension System: MemoryAddressable {
-    // you can make this your device router if you want, or just pass it to another type to do that work for you
 }
 ```
 
@@ -139,19 +134,72 @@ try mpu.tick()
 After executing an instruction, you can query the `Microprocessor` about some of its internal state, including:
 * register values via the `registers` property
 * the next instruction via `peek()`
-* the current run mode (in case a `WAI` or `STP` instruction was executed)
+* the current `runMode` (in case a `WAI` or `STP` instruction was executed)
+* the current `interruptMask` to see if any interrupts are being serviced and what class they are
 
-`Microprocessor` also provides some pin-level hardware simulation including:
-* `reset()` which will run through the reset process
-    * reset the program counter to the value at the reset vector
-    * clear register values
-    * return run mode to `normal`
-* `interrupt()` which will simulate a normal interrupt
-* `nonMaskableInterrupt()` which will simulate non-maskable interrupt
+`Microprocessor` also provides some pin-level hardware simulation like `reset()` which will:
+* reset the program counter to the value at the reset vector
+* clear register values
+* return run mode to `normal`
+* clear the `interruptMask`
 
 Lastly, you can control some aspects of execution via `Microprocessor.Configuration`.
 At present, this can control whether unused opcodes throw an error or not.
 For education purposes, you likely want to throw an error, but for pure simulation, you may not want to.
+
+### Interrupts
+
+The 65C02 processor has 2 dedicated lines for interrupts:
+* `IRQ` for maskable interrupts
+* `NMI` for non-maskable interrupts
+
+Devices can pull these lines low (therefore asserting) to interrupt the processor and execute high priority tasks after the currently executing instruction is complete.
+`Microprocessor` simulates this by polling all devices that can cause interrupts.
+This is defined by the `Interrupting` protocol:
+
+```swift
+public protocol Interrupting {
+    var interruptStatus: InterruptStatus { get }
+}
+```
+
+This is a simple protocol where when queried a device returns it's current `InterruptStatus`:
+
+```swift
+public enum InterruptStatus {
+    /// Device is not interrupting
+    case none
+
+    /// Device is interrupting and is non-maskable
+    case nonMaskable
+
+    /// Device is interrupting but is maskable
+    case maskable
+}
+``` 
+
+To opt-in to interrupt polling, a device conforms to this protocol:
+
+```swift
+struct VideoDisplayProcessor: Interrupting {
+    var scanline: Int
+    
+    var interruptStatus: InterruptStatus {
+        // if we have just drawn scanline 192, then raise an interrupt
+        return scanline == 192 ? .maskable : .none
+    }
+}
+```
+
+You then pass your list of `Interrupting` devices to `Microprocessor.init`:
+
+```swift
+let mpu = Microprocessor(memoryLayout: router, interruptors: [router.vdp])
+```
+
+Interrupt polling is done at the beginning of `tick()` so you will have to call this function after setting `interruptStatus` before an interrupt is actually raised.
+Note that the `Microprocessor` will re-enter an interrupt handler if the `interruptStatus` is not de-asserted!
+This mirrors real-world behavior where many devices must have a status register read before the interrupt line is cleared.
 
 ## Next Steps
 
@@ -161,8 +209,7 @@ In the future, it would be great to make some changes to `Microprocessor` includ
 This will allow calling it from any thread while protecting its internal state
 * abstract `Microprocessor` to a protocol so other 8-bit MPUs can be swapped in, including an old NMOS 6502 or a Z80, all with the same calling conventions
 * more and better hardware simulation. 
-Many of the 65C02 pins aren't really abstracted here so you can't simulate wait states and the like. 
-In addition, interrupts should technically be cleared by the devices themselves so there are some subtle bugs here.
+Many of the 65C02 pins aren't really abstracted here so you can't simulate wait states and the like.
 * cycle accurate execution. 
 The current core does not keep a count of cycles executed so cycle-accurate timing isn't currently possible  
 
